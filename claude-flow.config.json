@@ -1,0 +1,16 @@
+{
+  "terminal": {
+    "poolSize": 10,
+    "recycleAfter": 20,
+    "healthCheckInterval": 30000,
+    "type": "auto"
+  },
+  "orchestrator": {
+    "maxConcurrentTasks": 10,
+    "taskTimeout": 300000
+  },
+  "memory": {
+    "backend": "json",
+    "path": "./memory/claude-flow-data.json"
+  }
+}
