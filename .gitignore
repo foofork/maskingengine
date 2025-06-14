@@ -159,3 +159,29 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+# Project-specific development files
+.roomodes
+.roo/
+.claude/
+coordination.md
+memory-bank.md
+MASKINGENGINE.md
+automation*.log
+maskingengine_final_state.json
+tdd-workflow.json
+
+# Development trash
+trash/
+
+# Node.js dependencies (claude-flow)
+node_modules/
+package-lock.json
+
+# Test artifacts
+test_*.py
+htmlcov/
+
+# Temporary development files
+*.egg-info/
+maskingengine-cli
+EOF < /dev/null

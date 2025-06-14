@@ -1,0 +1,22 @@
+{
+  "default": [
+    {
+      "key": "test_project",
+      "value": "MaskingEngine Test",
+      "namespace": "default",
+      "timestamp": 1749841257567
+    },
+    {
+      "key": "project_name",
+      "value": "MaskingEngine - Local-first PII Sanitizer",
+      "namespace": "default",
+      "timestamp": 1749844380041
+    },
+    {
+      "key": "project_goal",
+      "value": "Build privacy-preserving PII masking system for AI workflows",
+      "namespace": "default",
+      "timestamp": 1749844382128
+    }
+  ]
+}

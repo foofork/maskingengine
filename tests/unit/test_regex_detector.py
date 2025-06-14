@@ -1,7 +1,7 @@
 """Unit tests for regex-based PII detection following TDD principles."""
 
 import pytest
-from maskingengine.detectors.regex_detector import RegexDetector
+from maskingengine.detectors import RegexDetector
 
 
 class TestRegexDetector:
@@ -21,7 +21,7 @@ class TestRegexDetector:
         assert detections[0][0] == "EMAIL"
         assert detections[0][1] == "john.doe@example.com"
         assert detections[0][2] == 14  # start position
-        assert detections[0][3] == 35  # end position
+        assert detections[0][3] == 34  # end position
     
     def test_detect_multiple_emails(self):
         """Test detection of multiple email addresses."""

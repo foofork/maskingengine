@@ -1,117 +1,88 @@
-# Coordination Center - MaskingEngine Development
+# Agent Coordination System
 
-Central coordination for MaskingEngine development using SPARC and TDD methodologies.
+## Overview
+The Claude-Flow coordination system manages multiple AI agents working together on complex tasks. It provides intelligent task distribution, resource management, and inter-agent communication.
 
-## Active Development Workflow
+## Agent Types and Capabilities
+- **Researcher**: Web search, information gathering, knowledge synthesis
+- **Coder**: Code analysis, development, debugging, testing
+- **Analyst**: Data processing, pattern recognition, insights generation
+- **Coordinator**: Task planning, resource allocation, workflow management
+- **General**: Multi-purpose agent with balanced capabilities
 
-### SPARC + TDD Process
-1. **Specification**: Define feature requirements and acceptance criteria
-2. **Test First**: Write failing tests that define expected behavior
-3. **Implementation**: Write minimal code to pass tests
-4. **Refinement**: Refactor while keeping tests green
-5. **Documentation**: Update docs and examples
+## Task Management
+- **Priority Levels**: 1 (lowest) to 10 (highest)
+- **Dependencies**: Tasks can depend on completion of other tasks
+- **Parallel Execution**: Independent tasks run concurrently
+- **Load Balancing**: Automatic distribution based on agent capacity
 
-## Task Queue
+## Coordination Commands
+```bash
+# Agent Management
+npx claude-flow agent spawn <type> --name <name> --priority <1-10>
+npx claude-flow agent list
+npx claude-flow agent info <agent-id>
+npx claude-flow agent terminate <agent-id>
 
-### High Priority (Core Functionality)
-1. **Complete Test Coverage**
-   - Description: Achieve 90%+ test coverage for existing components
-   - Status: In Progress
-   - Components: regex_detector, masking_engine, sanitizer
-   - Approach: TDD - tests written, need to ensure all pass
+# Task Management  
+npx claude-flow task create <type> <description> --priority <1-10> --deps <task-ids>
+npx claude-flow task list --verbose
+npx claude-flow task status <task-id>
+npx claude-flow task cancel <task-id>
 
-2. **FastAPI REST Implementation**
-   - Description: Build REST API with /sanitize and /rehydrate endpoints
-   - Status: Pending
-   - Dependencies: Core library tests passing
-   - Approach: Write API tests first, then implement
-
-3. **CLI Interface Development**
-   - Description: Create command-line interface using Click
-   - Status: Pending
-   - Dependencies: Core library complete
-   - Approach: Define CLI spec, write tests, implement
-
-### Medium Priority
-1. **Docker Configuration**
-   - Description: Create Dockerfile and docker-compose setup
-   - Status: Pending
-   - Requirements: Include NER model, optimize size
-
-2. **CI/CD Pipeline**
-   - Description: GitHub Actions for testing and deployment
-   - Status: Pending
-   - Requirements: Run tests, linters, build Docker image
-
-### Low Priority
-1. **Example Scripts**
-   - Description: Create example usage scripts
-   - Status: Pending
-   - Examples: Basic usage, API client, batch processing
-
-## Workflow Definitions
-
-### TDD Feature Development
-```yaml
-name: TDD Feature Development
-description: Standard workflow for adding new features
-steps:
-  - name: Write Specification
-    action: Define clear requirements in SPARC format
-  - name: Write Failing Tests
-    action: Create comprehensive test cases
-  - name: Implement Feature
-    action: Write minimal code to pass tests
-  - name: Refactor
-    action: Improve code quality, maintain green tests
-  - name: Document
-    action: Update README, API docs, examples
+# System Monitoring
+npx claude-flow status --verbose
+npx claude-flow monitor --interval 5000
 ```
 
-## Resource Allocation
-### Computational Resources
-- CPU: [Usage/Limits]
-- Memory: [Usage/Limits]
-- Storage: [Usage/Limits]
+## Workflow Execution
+Workflows are defined in JSON format and can orchestrate complex multi-agent operations:
+```bash
+npx claude-flow workflow examples/research-workflow.json
+npx claude-flow workflow examples/development-config.json --async
+```
 
-### External Resources
-- API Rate Limits: [Service: limit]
-- Database Connections: [Current/Max]
+## Advanced Features
+- **Circuit Breakers**: Automatic failure handling and recovery
+- **Work Stealing**: Dynamic load redistribution for efficiency
+- **Resource Limits**: Memory and CPU usage constraints
+- **Metrics Collection**: Performance monitoring and optimization
 
-## Communication Channels
-### Inter-Agent Messages
-- [Agent A → Agent B]: [Message type]
+## Configuration
+Coordination settings in `claude-flow.config.json`:
+```json
+{
+  "orchestrator": {
+    "maxConcurrentTasks": 10,
+    "taskTimeout": 300000,
+    "defaultPriority": 5
+  },
+  "agents": {
+    "maxAgents": 20,
+    "defaultCapabilities": ["research", "code", "terminal"],
+    "resourceLimits": {
+      "memory": "1GB",
+      "cpu": "50%"
+    }
+  }
+}
+```
 
-### External Communications
-- Webhooks: [Configured webhooks]
-- Notifications: [Notification settings]
+## Communication Patterns
+- **Direct Messaging**: Agent-to-agent communication
+- **Event Broadcasting**: System-wide notifications
+- **Shared Memory**: Common information access
+- **Task Handoff**: Seamless work transfer between agents
 
-## Synchronization Points
-- [Sync Point 1]: [Description]
-- [Sync Point 2]: [Description]
+## Best Practices
+- Start with general agents and specialize as needed
+- Use descriptive task names and clear requirements
+- Monitor system resources during heavy workloads
+- Implement proper error handling in workflows
+- Regular cleanup of completed tasks and inactive agents
 
-## Conflict Resolution
-### Strategy
-- [How conflicts are resolved]
-
-### Recent Conflicts
-- [Date]: [Conflict description] → [Resolution]
-
-## Performance Metrics
-### Task Completion
-- Average time: [Time]
-- Success rate: [Percentage]
-
-### Agent Efficiency
-- [Agent Type]: [Metrics]
-
-## Scheduled Maintenance
-- [Date/Time]: [What will be done]
-
-## Emergency Procedures
-### System Overload
-1. [Step 1]
-2. [Step 2]
-
-### Agent Failure
-1. [Recovery procedure]
+## Troubleshooting
+- Check agent health with `npx claude-flow status`
+- View detailed logs with `npx claude-flow monitor`
+- Restart stuck agents with terminate/spawn cycle
+- Use `--verbose` flags for detailed diagnostic information

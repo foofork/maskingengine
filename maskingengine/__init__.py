@@ -2,7 +2,7 @@
 
 __version__ = "1.0.0"
 
-from .core.sanitizer import sanitize, rehydrate
-from .core.config import SanitizerConfig
+from .sanitizer import Sanitizer
+from .config import Config
 
-__all__ = ["sanitize", "rehydrate", "SanitizerConfig"]
+__all__ = ["Sanitizer", "Config"]

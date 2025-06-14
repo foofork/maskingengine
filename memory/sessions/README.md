@@ -1,17 +1,32 @@
-# Sessions Directory
+# Session Memory Storage
 
-This directory stores session-specific information and terminal states.
+## Purpose
+This directory stores session-based memory data, conversation history, and contextual information for development sessions using the Claude-Flow orchestration system.
 
 ## Structure
-Each session gets a unique directory:
-- `session-[timestamp]/`: Session data
-  - `metadata.json`: Session metadata
-  - `terminal.log`: Terminal output
-  - `commands.history`: Command history
-  - `state.json`: Session state snapshot
+Sessions are organized by date and session ID for easy retrieval:
 
-## Retention Policy
-Sessions are retained for 30 days by default, then archived or deleted based on configuration.
+```
+memory/sessions/
+├── 2024-01-10/
+│   ├── session_001/
+│   │   ├── metadata.json        # Session metadata and configuration
+│   │   ├── conversation.md      # Full conversation history
+│   │   ├── decisions.md         # Key decisions and rationale
+│   │   ├── artifacts/           # Generated files and outputs
+│   │   └── coordination_state/  # Coordination system snapshots
+│   └── ...
+└── shared/
+    ├── patterns.md              # Common session patterns
+    └── templates/               # Session template files
+```
 
-## Usage
-The Claude-Flow system automatically manages session files. Do not modify these files manually.
+## Usage Guidelines
+1. **Session Isolation**: Each session gets its own directory
+2. **Metadata Completeness**: Always fill out session metadata
+3. **Conversation Logging**: Document all significant interactions
+4. **Artifact Organization**: Structure generated files clearly
+5. **State Preservation**: Snapshot coordination state regularly
+
+## Last Updated
+2025-06-13T17:43:17.335Z
