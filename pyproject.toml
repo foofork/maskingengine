@@ -57,10 +57,10 @@ minimal = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/maskingengine/maskingengine"
-Documentation = "https://maskingengine.dev/docs"
-Repository = "https://github.com/maskingengine/maskingengine"
-"Bug Tracker" = "https://github.com/maskingengine/maskingengine/issues"
+Homepage = "https://github.com/foofork/maskingengine"
+Documentation = "https://github.com/foofork/maskingengine/blob/main/docs/README.md"
+Repository = "https://github.com/foofork/maskingengine"
+"Bug Tracker" = "https://github.com/foofork/maskingengine/issues"
 
 [project.scripts]
 maskingengine = "maskingengine.cli.main:cli"

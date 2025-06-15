@@ -24,11 +24,11 @@ setup(
     description="Privacy-first, blazing-fast PII redaction for AI pipelines",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/maskingengine/maskingengine",
+    url="https://github.com/foofork/maskingengine",
     project_urls={
-        "Bug Reports": "https://github.com/maskingengine/maskingengine/issues",
-        "Source": "https://github.com/maskingengine/maskingengine",
-        "Documentation": "https://maskingengine.dev/docs",
+        "Bug Reports": "https://github.com/foofork/maskingengine/issues",
+        "Source": "https://github.com/foofork/maskingengine",
+        "Documentation": "https://github.com/foofork/maskingengine/blob/main/docs/README.md",
     },
     packages=find_packages(exclude=["tests", "tests.*", "docs", "examples"]),
     classifiers=[
