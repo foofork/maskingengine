@@ -201,6 +201,7 @@ echo "Call 555-123-4567" | maskingengine mask --stdin --regex-only
 ## 📚 Documentation
 
 ### Core Guides
+* **[Workflow Guide](docs/workflows.md)** - Visual workflow diagrams and decision guide
 * **[API Reference](docs/api.md)** - Complete REST API documentation
 * **[Features Overview](docs/features.md)** - Comprehensive feature documentation  
 * **[Usage Examples](docs/examples.md)** - Python, CLI, API, and framework examples

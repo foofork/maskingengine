@@ -5,6 +5,7 @@ Welcome to the MaskingEngine documentation! This directory contains comprehensiv
 ## 📖 Documentation Index
 
 ### Core Documentation
+- **[Workflow Guide](workflows.md)** - Visual workflow diagrams and decision guide
 - **[API Reference](api.md)** - Complete REST API documentation with examples
 - **[Features Overview](features.md)** - Comprehensive feature documentation and capabilities
 - **[Usage Examples](examples.md)** - Python SDK, CLI, API, and framework integration examples
