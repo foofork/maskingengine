@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "maskingengine",
+			"path": "../Developer/maskingengine"
+		},
+		{
+			"name": "maskingengine",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
