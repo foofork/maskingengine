@@ -1181,4 +1181,103 @@ import json
 print(json.dumps(monitored_sanitizer.get_metrics(), indent=2))
 ```
 
+## LLM Integration Best Practices
+
+### Prompting LLMs to Preserve Placeholders
+
+**Critical Success Factor**: The LLM must preserve placeholder tokens exactly for successful rehydration.
+
+#### ✅ **Effective Prompt Template:**
+```python
+def create_llm_prompt_with_placeholder_preservation(user_content: str) -> str:
+    return f"""You are a helpful assistant. Please respond to the user's request below.
+
+IMPORTANT: The text contains placeholder tokens in the format <<TYPE_HASH_INDEX>> (like <<EMAIL_7A9B2C_1>>). 
+You MUST preserve these tokens EXACTLY as they appear in your response. Do not modify, replace, or remove them.
+
+User request: {user_content}
+
+Remember: Keep all placeholder tokens (<<...>>) exactly as shown."""
+```
+
+#### 📝 **Prompt Examples by Use Case:**
+
+**Summarization:**
+```
+Please summarize the following text. 
+
+IMPORTANT: Keep all privacy tokens (<<TYPE_HASH_INDEX>>) unchanged in your summary.
+
+Text to summarize: {content}
+```
+
+**Translation:**
+```
+Translate this text to Spanish.
+
+CRITICAL RULE: Do NOT translate the privacy tokens <<TYPE_HASH_INDEX>>. 
+Keep them exactly as they appear in the original.
+
+Original text: {content}
+```
+
+**Code Generation:**
+```
+Generate code based on this description.
+
+MANDATORY: If the description contains <<TYPE_HASH_INDEX>> tokens, 
+include them exactly as placeholder values in your code.
+
+Description: {content}
+```
+
+#### ⚠️ **Common Mistakes to Avoid:**
+
+| ❌ **Don't Do** | ✅ **Do Instead** |
+|----------------|------------------|
+| "Summarize: Contact [REDACTED] for info" | "Summarize (preserve <<EMAIL_7A9B2C_1>> exactly): Contact <<EMAIL_7A9B2C_1>> for info" |
+| "What does <<EMAIL_7A9B2C_1>> represent?" | Treat placeholders as opaque tokens to preserve |
+| Using unclear formats like [REDACTED] | Use distinctive <<TYPE_HASH_INDEX>> format |
+| No validation of preservation | Always validate placeholders before rehydration |
+
+#### 🔍 **Validation Example:**
+```python
+def validate_placeholder_preservation(original_masked: str, llm_response: str) -> bool:
+    import re
+    placeholder_pattern = r'<<[A-Z0-9_]+_[A-F0-9]{6}_\d+>>'
+    
+    original_placeholders = set(re.findall(placeholder_pattern, original_masked))
+    response_placeholders = set(re.findall(placeholder_pattern, llm_response))
+    
+    missing = original_placeholders - response_placeholders
+    if missing:
+        print(f"⚠️ Missing placeholders: {missing}")
+        return False
+    return True
+```
+
+#### 🏭 **Production Integration Pattern:**
+```python
+def safe_llm_processing(user_input: str, session_id: str) -> str:
+    # 1. Mask PII
+    masked_content, _ = pipeline.sanitize_with_session(user_input, session_id)
+    
+    # 2. Create preservation prompt
+    prompt = create_llm_prompt_with_placeholder_preservation(masked_content)
+    
+    # 3. Call LLM
+    llm_response = your_llm_client.complete(prompt)
+    
+    # 4. Validate preservation
+    if not validate_placeholder_preservation(masked_content, llm_response):
+        raise ValueError("LLM failed to preserve placeholders")
+    
+    # 5. Rehydrate safely
+    return pipeline.rehydrate_with_session(llm_response, session_id)
+```
+
+**📖 For complete examples, see [`examples/llm_integration_example.py`](../examples/llm_integration_example.py)**
+
+---
+
 This comprehensive set of examples demonstrates the versatility and power of MaskingEngine across different use cases, from simple text processing to complex production deployments. Each example includes practical code that can be adapted to specific requirements.
