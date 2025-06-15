@@ -14,6 +14,10 @@ Your package is **already well-structured** for PyPI distribution! Here's what y
 - ✅ Proper dependency specification
 - ✅ MIT license
 - ✅ Comprehensive README.md
+- ✅ GitHub Actions workflows (`.github/workflows/`)
+  - `test.yml` - Continuous integration testing
+  - `publish.yml` - Manual/release publishing
+  - `release.yml` - Automated releases on git tags
 
 ### Distribution Files ✅
 - ✅ `maskingengine-1.0.0-py3-none-any.whl` (wheel package)
@@ -59,28 +63,24 @@ twine upload dist/*
 
 ### 3. PyPI Account Setup
 
+#### Option A: Trusted Publishing (Recommended)
 1. **Create PyPI account**: https://pypi.org/account/register/
 2. **Create TestPyPI account**: https://test.pypi.org/account/register/
-3. **Generate API tokens** for both accounts
-4. **Configure authentication**:
-   ```bash
-   # Create ~/.pypirc
-   cat > ~/.pypirc << EOF
-   [distutils]
-   index-servers =
-       pypi
-       testpypi
+3. **Set up Trusted Publishing**:
+   - Go to PyPI Account Settings → Publishing
+   - Add a new trusted publisher:
+     - Repository: `foofork/maskingengine`
+     - Workflow name: `release.yml`
+     - Environment name: `pypi`
+   - Do the same for TestPyPI with environment name: `testpypi`
 
-   [pypi]
-   username = __token__
-   password = <your-pypi-token>
-
-   [testpypi]
-   repository = https://test.pypi.org/legacy/
-   username = __token__
-   password = <your-testpypi-token>
-   EOF
-   ```
+#### Option B: API Tokens
+4. **Generate API tokens** for both accounts
+5. **Add GitHub Secrets**:
+   - Go to GitHub repository → Settings → Secrets and variables → Actions
+   - Add secrets:
+     - `PYPI_API_TOKEN`: Your PyPI token
+     - `TEST_PYPI_API_TOKEN`: Your TestPyPI token
 
 ## 📦 What Developers Get
 
@@ -147,6 +147,22 @@ twine upload --repository testpypi dist/*
 ```
 
 ### Publishing Workflow
+
+#### Automated Publishing (Recommended)
+```bash
+# 1. Update version in pyproject.toml
+# 2. Create and push a git tag
+git tag v1.0.1
+git push origin v1.0.1
+
+# 3. GitHub Actions automatically:
+#    - Runs tests
+#    - Builds packages
+#    - Creates GitHub release
+#    - Publishes to PyPI
+```
+
+#### Manual Publishing
 ```bash
 # 1. Update version
 # 2. Rebuild packages
