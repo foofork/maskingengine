@@ -165,10 +165,14 @@ yarn-error.log*
 .claude/
 coordination.md
 memory-bank.md
+memory/
 MASKINGENGINE.md
 automation*.log
 maskingengine_final_state.json
 tdd-workflow.json
+
+# Runtime storage
+rehydration_storage/
 
 # Development trash
 trash/
@@ -184,4 +188,3 @@ htmlcov/
 # Temporary development files
 *.egg-info/
 maskingengine-cli
-EOF < /dev/null

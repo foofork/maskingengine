@@ -3,7 +3,7 @@
 
 import os
 import uvicorn
-from api.main import app, API_HOST, API_PORT
+from maskingengine.api.main import app, API_HOST, API_PORT
 
 if __name__ == "__main__":
     print(f"🚀 Starting MaskingEngine API on http://{API_HOST}:{API_PORT}")

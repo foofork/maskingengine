@@ -1,0 +1,38 @@
+# Custom Pattern Pack Example
+# This demonstrates how users can create their own pattern packs
+
+name: "custom"
+description: "Custom enterprise patterns for organization-specific PII"
+version: "1.0.0"
+
+patterns:
+  # Employee ID patterns
+  - name: EMPLOYEE_ID
+    description: "Company employee ID format EMP123456"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bEMP\d{6}\b'
+
+  - name: PROJECT_CODE
+    description: "Internal project codes like PROJ-2024-001"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bPROJ-\d{4}-\d{3}\b'
+
+  - name: CUSTOMER_ID
+    description: "Customer IDs in format CUST-ABC-123"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bCUST-[A-Z]{3}-\d{3}\b'
+
+  - name: API_KEY
+    description: "Basic API key format"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bapi[_-]?key[_-]?[a-zA-Z0-9]{32,}\b'
+      - '\b[a-zA-Z0-9]{32,64}\b(?=.*key)'
+

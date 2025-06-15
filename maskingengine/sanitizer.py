@@ -15,9 +15,10 @@ class Sanitizer:
         """Initialize sanitizer with configuration."""
         self.config = config or Config()
         self.detector = Detector(self.config)
-        self.masker = Masker(self.config.TYPE_HASHES)
+        self.masker = Masker(self.config.TYPE_HASHES, self.config)
+        self.mask_map = {}  # Store original values for rehydration
     
-    def sanitize(self, input_data: Union[str, Dict, Any], format: Optional[str] = None) -> Union[str, Dict]:
+    def sanitize(self, input_data: Union[str, Dict, Any], format: Optional[str] = None) -> tuple:
         """
         Sanitize input data by detecting and masking PII.
         
@@ -26,7 +27,7 @@ class Sanitizer:
             format: Optional format hint ("text", "json", "html", or None for auto-detect)
             
         Returns:
-            Sanitized data in same format as input
+            Tuple of (sanitized_data, mask_map) where mask_map contains original values for rehydration
             
         Raises:
             ValueError: If input is too large or invalid
@@ -39,20 +40,25 @@ class Sanitizer:
             if len(input_str) > self.config.MAX_TEXT_LENGTH:
                 raise ValueError(f"Input too large: {len(input_str)} > {self.config.MAX_TEXT_LENGTH}")
             
+            # Reset mask map for each sanitization
+            self.mask_map = {}
+            
             # Parse input based on format
             if format == "json" or (format is None and isinstance(input_data, dict)):
-                return self._sanitize_json(input_data)
+                result = self._sanitize_json(input_data)
             elif format == "html" or (format is None and isinstance(input_data, str) and self._is_html(input_data)):
-                return self._sanitize_html(input_data)
+                result = self._sanitize_html(input_data)
             else:
-                return self._sanitize_text(str(input_data))
+                result = self._sanitize_text(str(input_data))
+            
+            return (result, self.mask_map.copy())
                 
         except ValueError:
             # Re-raise validation errors
             raise
         except Exception as e:
             # Graceful degradation for other errors
-            return str(input_data)  # Return original on error
+            return (str(input_data), {})  # Return original on error
         finally:
             # Performance monitoring
             elapsed = (time.time() - start_time) * 1000
@@ -65,14 +71,19 @@ class Sanitizer:
         detections = self.detector.detect_all(text)
         
         # Apply masking
-        return self.masker.mask(text, detections)
+        return self.masker.mask(text, detections, self.mask_map)
     
-    def _sanitize_json(self, data: Union[str, dict]) -> dict:
+    def _sanitize_json(self, data: Union[str, dict]) -> Union[dict, str]:
         """Sanitize JSON data while preserving structure."""
         # Parse JSON if string
         if isinstance(data, str):
             import json
-            parsed_data = json.loads(data)
+            try:
+                parsed_data = json.loads(data)
+            except json.JSONDecodeError as e:
+                # If JSON parsing fails, treat as plain text
+                print(f"Warning: Invalid JSON format, treating as plain text: {e}")
+                return self._sanitize_text(data)
         else:
             parsed_data = data
         
@@ -83,7 +94,7 @@ class Sanitizer:
         masked_texts = []
         for chunk in chunks:
             detections = self.detector.detect_all(chunk.text)
-            masked_text = self.masker.mask(chunk.text, detections)
+            masked_text = self.masker.mask(chunk.text, detections, self.mask_map)
             masked_texts.append(masked_text)
         
         # Reconstruct JSON
@@ -98,7 +109,7 @@ class Sanitizer:
         masked_texts = []
         for chunk in chunks:
             detections = self.detector.detect_all(chunk.text)
-            masked_text = self.masker.mask(chunk.text, detections)
+            masked_text = self.masker.mask(chunk.text, detections, self.mask_map)
             masked_texts.append(masked_text)
         
         # Reconstruct HTML

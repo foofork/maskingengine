@@ -1,245 +1,261 @@
 # MaskingEngine
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Version 1.01.01](https://img.shields.io/badge/version-1.01.01-blue.svg)](https://github.com/yourusername/maskingengine)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-87%25%20passing-green.svg)](https://github.com/yourusername/maskingengine)
+Privacy-first, blazing-fast PII redaction for AI pipelines.
 
-A local-first PII sanitizer for AI applications. Automatically detects and masks sensitive data before sending to external AI services.
+MaskingEngine is a local-first, multilingual PII sanitizer built for AI applications, logs, and data workflows. It detects and masks emails, phone numbers, names, IDs, and more before text is sent to large language models or stored in logs.
 
-Transform: `"Email john.doe@acme.com or call (555) 123-4567"`  
-Into: `"Email <<EMAIL_7D8E9F>> or call <<PHONE_4G5H6I>>"`
+**Input:**   `Contact John Smith at john@example.com or call 555-123-4567`  
+**Output:**  `Contact John Smith at <<EMAIL_7A9B2C_1>> or call <<PHONE_4D8E1F_1>>`
 
-## Features
+## 🚀 Features
 
-- **Local Processing**: All data processing happens on your infrastructure
-- **Format Support**: Handles plain text, JSON, and HTML while preserving structure
-- **Deterministic Output**: Same input always produces the same masked result
-- **Fast Performance**: <100ms processing for typical documents
-- **Zero Dependencies**: No external API calls or network requirements
+* 🧠 **Multilingual NER** — DistilBERT model for contextual PII detection in 100+ languages
+* ⚡ **Regex-only mode** — No model loading, <50ms masking for structured PII
+* 🧩 **YAML pattern packs** — Easily extend detection for your org or domain
+* 💬 **Format-aware** — Preserves structure in JSON, HTML, plain text
+* 🔐 **Fully local** — No network calls, no telemetry, production-ready
+* 🔁 **Optional Rehydration** — Restore original PII when needed (most use cases don't need this)
+* 🔧 **CLI, REST API, SDK** — Drop into LangChain, Python pipelines, or microservices
 
-## Quick Start
+## 🛠 Installation
 
-### Installation
 ```bash
 pip install maskingengine
 ```
 
-### Basic Usage
+### Requirements
+- Python 3.8+
+- Dependencies: PyTorch, Transformers, FastAPI (for API), Click (for CLI)
+
+### Development Installation
+```bash
+# Clone and install for development
+git clone https://github.com/maskingengine/maskingengine.git
+cd maskingengine
+pip install -e .
+
+# Install development dependencies
+pip install -r requirements-dev.txt
+```
+
+## 🚀 Quick Start
+
+```bash
+# CLI (Regex-only mode)
+echo "Email john@example.com or call 555-123-4567" | maskingengine mask --stdin --regex-only
+```
+
 ```python
+# Python usage
 from maskingengine import Sanitizer
 
 sanitizer = Sanitizer()
-
-# Mask sensitive data
-text = "Contact John Smith at john.smith@acme.com or call +1-555-123-4567"
-masked = sanitizer.sanitize(text)
+masked, mask_map = sanitizer.sanitize("Email john@example.com")
 print(masked)
-# Output: "Contact John Smith at <<EMAIL_7D8E9F>> or call <<PHONE_G7H8I9>>"
+# => "Email <<EMAIL_7A9B2C_1>>"
 
-# Safe to send to AI services
-ai_response = your_ai_service(masked)
+# mask_map contains original values for optional restoration
+# Most use cases just use 'masked' and discard 'mask_map'
 ```
 
-### Supported Data Formats
+## 🔎 What It Detects
 
-**Plain Text**
-```python
-sanitizer.sanitize("Email me at john@example.com")
+### Built-in (Regex-based)
+
+| Type | Example | Global Support |
+|------|---------|----------------|
+| Email | `john@example.com` | ✅ Universal |
+| Phone | `+1 555-123-4567` | ✅ US/EU/Intl |
+| IP Address | `192.168.1.1` | ✅ IPv4/IPv6 |
+| Credit Card | `4111-1111-1111-1111` | ✅ Luhn-validated |
+| SSN | `123-45-6789` | 🇺🇸 US only |
+| ID Numbers | `X1234567B, BSN, INSEE` | 🇪🇸 🇳🇱 🇫🇷 etc. |
+
+### NER-based (DistilBERT model)
+
+| Type | Example | Languages |
+|------|---------|-----------|
+| Email | `john@example.com` | Multilingual |
+| Phone | `555-123-4567` | Multilingual |
+| Social Numbers | `123-45-6789` | Multilingual |
+
+*Note: NER model complements regex patterns and excels at contextual detection*
+
+## 🧩 Pattern Packs
+
+Define your own redaction rules using YAML:
+
+```yaml
+# patterns/custom.yaml
+name: "custom"
+description: "Enterprise-specific patterns"
+version: "1.0.0"
+
+patterns:
+  - name: EMPLOYEE_ID
+    description: "Employee ID numbers"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bEMP\d{6}\b'
 ```
 
-**JSON (preserves structure)**
+Then load:
 ```python
-data = {"email": "jane@company.com", "phone": "555-123-4567"}
-result = sanitizer.sanitize(data)
-# Returns: {"email": "<<EMAIL_D4E5F6>>", "phone": "<<PHONE_G7H8I9>>"}
-```
-
-**HTML (preserves markup)**
-```python
-html = '<a href="mailto:john@example.com">Contact</a>'
-sanitizer.sanitize(html)
-# Returns: '<a href="mailto:<<EMAIL_A1B2C3>>">Contact</a>'
-```
-
-## Detection Capabilities (v1.01.01)
-
-| PII Type | Examples | Method |
-|----------|----------|---------|
-| Email | `john@company.com` | Regex Pattern |
-| Phone | `(555) 123-4567`, `+1-555-123-4567` | Regex Pattern |
-| Credit Cards | `4111-1111-1111-1111` | Regex + Luhn Validation |
-| IP Address | `192.168.1.1`, `2001:db8::1` | Regex Pattern |
-| SSN | `123-45-6789` | Regex Pattern |
-
-### In Development
-- **Names, Organizations, Locations**: NER-based detection for multilingual content
-- **REST API**: HTTP service with OpenAPI documentation
-- **CLI Tools**: Command-line interface for batch processing
-
-## Use Cases
-
-### AI Pipeline Protection
-```python
-# Clean data before sending to external AI
-user_input = "My email is sarah@company.com"
-safe_input = sanitizer.sanitize(user_input)
-ai_response = openai_api.chat(safe_input)
-```
-
-### Log Sanitization
-```python
-# Remove PII from application logs
-with open('app.log', 'r') as f:
-    for line in f:
-        clean_line = sanitizer.sanitize(line)
-        safe_logs.append(clean_line)
-```
-
-### Data Processing
-```python
-# Clean datasets before analysis
-for record in customer_data:
-    safe_record = sanitizer.sanitize(record)
-    cleaned_data.append(safe_record)
-```
-
-## Configuration
-
-```python
-from maskingengine import Sanitizer, Config
-
-# Default configuration
-sanitizer = Sanitizer()
-
-# Custom configuration
-config = Config()
+from maskingengine import Config, Sanitizer
+config = Config(pattern_packs=["default", "custom"])
 sanitizer = Sanitizer(config)
 ```
 
-## Performance
+## 📄 Input Formats
 
-- **Latency**: <100ms for most documents (1-10KB)
-- **Memory**: ~50MB RAM for core functionality
-- **Throughput**: 300+ documents/second for typical workloads
-- **Reliability**: Graceful error handling, returns original data on processing failures
-
-## Integration Examples
-
-### LangChain
 ```python
+# JSON - structure preserved
+result, mask_map = sanitizer.sanitize({"email": "jane@company.com"}, format="json")
+
+# HTML - tags preserved
+html = '<a href="mailto:john@example.com">Email</a>'
+result, mask_map = sanitizer.sanitize(html, format="html")
+
+# Plain text - auto-detected
+text = "Contacta a María García en maria@empresa.es"  
+result, mask_map = sanitizer.sanitize(text)
+```
+
+## ⚙️ Configuration Options
+
+```python
+config = Config(
+    regex_only=True,                    # Speed mode (no NER)
+    pattern_packs=["default", "custom"], # Load specific pattern packs
+    whitelist=["support@company.com"],   # Terms to exclude from masking
+    min_confidence=0.9,                 # NER confidence threshold
+    strict_validation=True              # Enable validation (Luhn check, etc.)
+)
+sanitizer = Sanitizer(config)
+```
+
+## 🖥 REST API
+
+Start the API server:
+```bash
+python run_api.py
+# API available at http://localhost:8000
+# Interactive docs at http://localhost:8000/docs
+```
+
+Example usage:
+```bash
+curl -X POST http://localhost:8000/sanitize \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Email john@example.com",
+    "format": "text",
+    "regex_only": true
+  }'
+```
+
+## 💡 Framework Integration Examples
+
+```python
+# LangChain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from maskingengine import Sanitizer
-
 sanitizer = Sanitizer()
 
 class PrivacyTextSplitter(RecursiveCharacterTextSplitter):
-    def split_text(self, text):
-        return super().split_text(sanitizer.sanitize(text))
-```
+  def split_text(self, text):
+    masked, _ = sanitizer.sanitize(text)
+    return super().split_text(masked)
 
-### Pandas DataFrames
-```python
+# Pandas
 import pandas as pd
 from maskingengine import Sanitizer
-
 sanitizer = Sanitizer()
-
-def clean_dataframe(df):
-    for col in df.select_dtypes(include=['object']):
-        df[col] = df[col].apply(lambda x: sanitizer.sanitize(str(x)) if pd.notna(x) else x)
-    return df
+df["message"] = df["message"].apply(lambda x: sanitizer.sanitize(str(x))[0])
 ```
 
-### Streamlit Applications
+## 🧪 Performance Modes
+
+| Mode | Speed | Accuracy | Use Case |
+|------|-------|----------|----------|
+| Regex-only | <50ms | High for structured PII | Logs, structured data |
+| NER + Regex | <200ms* | Highest | Unstructured text, contextual |
+| Custom patterns | <100ms | Domain-specific | Enterprise rules |
+
+*Note: First NER run includes ~8s model loading time. Subsequent runs are <200ms.*
+
+## 📦 CLI Usage
+
+```bash
+# Regex-only (fastest)
+maskingengine mask input.txt --regex-only -o output.txt
+
+# Custom patterns
+maskingengine mask input.txt --pattern-packs default custom -o output.txt
+
+# From stdin
+echo "Call 555-123-4567" | maskingengine mask --stdin --regex-only
+```
+
+## 📚 Documentation
+
+### Core Guides
+* **[API Reference](docs/api.md)** - Complete REST API documentation
+* **[Features Overview](docs/features.md)** - Comprehensive feature documentation  
+* **[Usage Examples](docs/examples.md)** - Python, CLI, API, and framework examples
+* **[Architecture Overview](docs/architecture.md)** - System design and components
+
+### Customization & Advanced Usage
+* **[Custom Pattern Packs](docs/patterns.md)** - Create organization-specific PII patterns
+* **[Performance & Production](docs/architecture.md#performance-architecture)** - Scaling and deployment guidance
+
+### Getting Started
+* **[Quick Start](#-quick-start)** - Basic usage examples
+* **[Installation](#installation)** - Setup instructions
+* **[CLI Usage](#-cli-usage)** - Command-line interface guide
+
+## 🔁 Rehydration System
+
+**Rehydration is completely optional** — most use cases only need sanitization for permanent PII removal (logs, analytics, training data).
+
+For AI pipeline integration, MaskingEngine can restore original PII after LLM processing:
+
 ```python
-import streamlit as st
-from maskingengine import Sanitizer
+from maskingengine import RehydrationPipeline, Sanitizer, RehydrationStorage
 
+# Setup pipeline
 sanitizer = Sanitizer()
+storage = RehydrationStorage()
+pipeline = RehydrationPipeline(sanitizer, storage)
 
-user_input = st.text_area("Enter text:")
-if st.button("Process"):
-    masked = sanitizer.sanitize(user_input)
-    st.write("Masked:", masked)
+# Step 1: Mask before sending to LLM
+masked_content, storage_path = pipeline.sanitize_with_session(
+    "Contact john@example.com about the project", 
+    session_id="user_123"
+)
+
+# Step 2: Send masked_content to LLM
+llm_response = llm.process(masked_content)
+
+# Step 3: Restore original PII in response
+final_response = pipeline.rehydrate_with_session(llm_response, "user_123")
 ```
 
-## Development
+### Common Workflows:
+* ✅ **Sanitize-only**: Logs, analytics, training data (no rehydration needed)
+* 🔄 **Round-trip**: AI pipelines where you restore PII in responses
 
-### Setup
-```bash
-git clone https://github.com/yourusername/maskingengine.git
-cd maskingengine
-pip install -e ".[dev]"
-```
+📖 **[Complete examples and patterns →](docs/examples.md#session-based-workflow)**
 
-### Testing
-```bash
-pytest                    # Run tests
-pytest --cov=maskingengine  # With coverage
-```
+## 🤝 Contributing
 
-### Code Quality
-```bash
-black .                   # Format code
-ruff check .             # Lint code
-mypy maskingengine       # Type checking
-```
+1. Fork and clone
+2. Add tests for new features
+3. Submit a PR with a clear description
 
-## Architecture
+We welcome contributors from privacy, AI, and data tooling backgrounds.
 
-MaskingEngine uses a simple 5-module architecture:
+## 🔐 License
 
-```
-maskingengine/
-├── config.py      # Configuration management
-├── parsers.py     # Text/JSON/HTML parsing
-├── detectors.py   # Regex-based PII detection
-├── masker.py      # Placeholder generation
-└── sanitizer.py   # Main API
-```
-
-## Roadmap
-
-### v1.1.0 - Enhanced Detection
-- NER model integration for names, organizations, locations
-- Improved international phone number support
-- Additional PII pattern types
-
-### v1.2.0 - Integration Suite
-- REST API with OpenAPI documentation
-- Command-line tools for batch processing
-- Docker container support
-
-### v2.0.0 - Enterprise Features
-- Custom pattern definitions
-- Audit logging and compliance reporting
-- Performance optimizations for high-volume processing
-
-## Current Status
-
-- **Core Library**: Production ready
-- **Python Integration**: Fully functional
-- **REST API**: In development
-- **CLI Tools**: In development
-- **NER Detection**: Planned for v1.1.0
-
-## Documentation
-
-- [Implementation Guide](docs/implementation_guide.md)
-- [API Reference](docs/api/)
-- [Architecture Guide](docs/architecture/)
-- [Examples](examples/)
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
-
-For bug reports and feature requests, please use [GitHub Issues](https://github.com/yourusername/maskingengine/issues).
+MIT License. Fully open-source and local-first — no cloud APIs required.

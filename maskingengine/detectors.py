@@ -19,36 +19,63 @@ class Detection:
 
 
 class RegexDetector:
-    """Fast regex-based PII detection."""
+    """Fast regex-based PII detection with pattern pack support."""
     
-    def __init__(self, patterns: Optional[dict] = None):
-        self.patterns = patterns or Config.PATTERNS
+    def __init__(self, config: Optional[Config] = None):
+        self.config = config or Config()
+        self.patterns = self.config.PATTERNS
         self.compiled_patterns = self._compile_patterns()
     
     def _compile_patterns(self):
-        """Pre-compile all regex patterns."""
+        """Pre-compile all regex patterns with error handling."""
         compiled = {}
-        for name, pattern in self.patterns.items():
-            compiled[name] = re.compile(pattern, re.IGNORECASE | re.MULTILINE)
+        for name, patterns in self.patterns.items():
+            compiled_patterns = []
+            
+            # Handle both single pattern strings and lists of patterns
+            pattern_list = patterns if isinstance(patterns, list) else [patterns] if isinstance(patterns, str) else []
+            
+            for pattern in pattern_list:
+                try:
+                    compiled_pattern = re.compile(pattern, re.IGNORECASE | re.MULTILINE)
+                    compiled_patterns.append(compiled_pattern)
+                except re.error as e:
+                    print(f"Warning: Invalid regex pattern in {name}: {pattern} - {e}")
+                    continue  # Skip invalid patterns
+                except Exception as e:
+                    print(f"Warning: Unexpected error compiling pattern in {name}: {pattern} - {e}")
+                    continue
+            
+            compiled[name] = compiled_patterns
         return compiled
     
+    
     def detect(self, text: str) -> List[Tuple[str, str, int, int]]:
-        """Detect PII using regex patterns."""
+        """Detect PII using regex patterns with context validation."""
         detections = []
         
-        for pii_type, pattern in self.compiled_patterns.items():
-            for match in pattern.finditer(text):
-                # Special validation for credit cards (Luhn check)
-                if pii_type == 'CREDIT_CARD':
-                    if not self._luhn_check(match.group()):
+        for pii_type, patterns in self.compiled_patterns.items():
+            # Iterate through all patterns for this PII type
+            for pattern in patterns:
+                for match in pattern.finditer(text):
+                    matched_text = match.group()
+                    start, end = match.start(), match.end()
+                    
+                    # Skip if in whitelist
+                    if matched_text.lower() in {w.lower() for w in self.config.whitelist}:
                         continue
-                
-                detections.append((
-                    pii_type,
-                    match.group(),
-                    match.start(),
-                    match.end()
-                ))
+                    
+                    # Special validation for credit cards (Luhn check)
+                    if pii_type.upper() in ['CREDIT_CARD', 'CREDIT_CARD_NUMBER'] and self.config.strict_validation:
+                        if not self._luhn_check(matched_text):
+                            continue
+                    
+                    detections.append((
+                        pii_type,
+                        matched_text,
+                        start,
+                        end
+                    ))
         
         return detections
     
@@ -76,31 +103,42 @@ class RegexDetector:
 
 
 class NERDetector:
-    """NER-based entity detection with lazy loading."""
+    """NER-based entity detection using DistilBERT for multilingual PII detection."""
     
-    def __init__(self, model_path: Optional[str] = None):
+    def __init__(self, model_path: Optional[str] = None, min_confidence: Optional[float] = None, config: Optional[Config] = None):
         self.model_path = model_path or Config.NER_MODEL_PATH
+        self.min_confidence = min_confidence or Config.NER_MIN_CONFIDENCE
+        self.config = config or Config()
+        self._tokenizer = None
         self._model = None
         self._model_loading = False
     
     @property
     def model(self):
-        """Lazy load NER model."""
+        """Lazy load NER model and tokenizer."""
         if self._model is None and not self._model_loading:
             self._model_loading = True
             try:
-                import spacy
-                self._model = spacy.load(self.model_path)
-            except (ImportError, OSError):
+                from transformers import AutoTokenizer, AutoModelForTokenClassification
+                self._tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+                self._model = AutoModelForTokenClassification.from_pretrained(self.model_path)
+            except (ImportError, OSError, Exception):
                 # Model not available, disable NER
                 self._model = None
+                self._tokenizer = None
             finally:
                 self._model_loading = False
         return self._model
     
+    @property
+    def tokenizer(self):
+        """Get tokenizer (ensures model is loaded first)."""
+        _ = self.model  # Trigger model loading
+        return self._tokenizer
+    
     def detect(self, text: str) -> List[Tuple[str, str, int, int]]:
-        """Detect entities using NER model."""
-        if not self.model:
+        """Detect entities using DistilBERT NER model."""
+        if not self.model or not self.tokenizer:
             return []  # Skip if model not available
         
         # Quick filter to avoid NER overhead
@@ -108,26 +146,69 @@ class NERDetector:
             return []
         
         try:
-            doc = self.model(text)
+            import torch
+            from transformers import pipeline
+            
+            # Create NER pipeline
+            ner_pipeline = pipeline(
+                "ner",
+                model=self.model,
+                tokenizer=self.tokenizer,
+                aggregation_strategy="simple",
+                device=0 if torch.cuda.is_available() else -1
+            )
+            
+            # Run inference
+            entities = ner_pipeline(text)
             detections = []
             
-            for ent in doc.ents:
-                # Filter by entity type and length
-                if (ent.label_ in ['PERSON', 'ORG', 'GPE'] and 
-                    len(ent.text.strip()) > 2):
+            for entity in entities:
+                # Filter by confidence threshold
+                if entity['score'] >= self.min_confidence and len(entity['word'].strip()) > 1:
+                    
+                    # Map entity types to our format
+                    entity_type = self._map_entity_type(entity['entity_group'])
+                    
+                    # Get the actual text from the original string
+                    actual_text = text[entity['start']:entity['end']]
+                    
+                    # Skip if in whitelist
+                    if actual_text.lower() in {w.lower() for w in self.config.whitelist}:
+                        continue
                     
                     detections.append((
-                        ent.label_,
-                        ent.text,
-                        ent.start_char,
-                        ent.end_char
+                        entity_type,
+                        actual_text,
+                        entity['start'],
+                        entity['end']
                     ))
             
             return detections
             
-        except Exception:
+        except Exception as e:
             # Graceful degradation on NER failure
             return []
+    
+    def _map_entity_type(self, entity_group: str) -> str:
+        """Map DistilBERT PII model entity types to our standard format."""
+        mapping = {
+            'EMAIL': 'EMAIL',
+            'TEL': 'PHONE', 
+            'PHONE': 'PHONE',
+            'SOCIALNUMBER': 'SSN',
+            'SSN': 'SSN',
+            'CREDIT_CARD': 'CREDIT_CARD',
+            'PERSON': 'PERSON',
+            'NAME': 'PERSON',
+            'ORGANIZATION': 'ORGANIZATION',
+            'ORG': 'ORGANIZATION',
+            'LOCATION': 'LOCATION',
+            'LOC': 'LOCATION',
+            'ADDRESS': 'LOCATION',
+            'DATE': 'DATE',
+            'TIME': 'TIME'
+        }
+        return mapping.get(entity_group.upper(), entity_group.upper())
     
     def _has_potential_entities(self, text: str) -> bool:
         """Quick heuristic check for potential proper nouns."""
@@ -139,8 +220,12 @@ class Detector:
     
     def __init__(self, config: Optional[Config] = None):
         self.config = config or Config()
-        self.regex_detector = RegexDetector(self.config.PATTERNS)
-        self.ner_detector = NERDetector(self.config.NER_MODEL_PATH) if self.config.NER_ENABLED else None
+        self.regex_detector = RegexDetector(self.config)
+        self.ner_detector = NERDetector(
+            self.config.NER_MODEL_PATH, 
+            self.config.NER_MIN_CONFIDENCE,
+            self.config
+        ) if self.config.NER_ENABLED else None
     
     def detect_all(self, text: str) -> List[Tuple[str, str, int, int]]:
         """Detect all PII using both regex and NER."""

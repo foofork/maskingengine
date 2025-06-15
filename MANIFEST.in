@@ -1,0 +1,10 @@
+# Include package data files
+include README.md
+include LICENSE
+include CHANGELOG.md
+recursive-include maskingengine/patterns *.yaml
+recursive-include docs *.md
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+recursive-exclude * .git*
