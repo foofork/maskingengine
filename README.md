@@ -19,23 +19,41 @@ MaskingEngine is a local-first, multilingual PII sanitizer built for AI applicat
 
 ## 🛠 Installation
 
+### From Source (Current)
 ```bash
-pip install maskingengine
+# Clone the repository
+git clone https://github.com/foofork/maskingengine.git
+cd maskingengine
+
+# Install with pip
+pip install .
+
+# Or install in development mode
+pip install -e .
 ```
 
 ### Requirements
 - Python 3.8+
 - Dependencies: PyTorch, Transformers, FastAPI (for API), Click (for CLI)
 
-### Development Installation
+### Development Setup
 ```bash
-# Clone and install for development
-git clone https://github.com/maskingengine/maskingengine.git
-cd maskingengine
-pip install -e .
-
 # Install development dependencies
 pip install -r requirements-dev.txt
+
+# Verify installation
+maskingengine test
+```
+
+> **Note**: PyPI package coming soon! For now, install from source.
+
+### Quick Installation Test
+```bash
+# Test CLI
+echo "Email: test@example.com" | maskingengine mask --stdin --regex-only
+
+# Test Python SDK
+python -c "from maskingengine import Sanitizer; print('✅ Installation successful!')"
 ```
 
 ## 🚀 Quick Start
