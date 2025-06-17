@@ -1,0 +1,234 @@
+# MaskingEngine Default Pattern Pack
+# This comprehensive pattern pack includes PII that is typically not needed for LLM conversational context.
+# It focuses on identifiers, codes, and technical data that can be safely masked without losing meaning.
+
+name: "default"
+description: "Comprehensive PII detection patterns for identifiers unlikely needed in LLM conversations"
+version: "2.0.0"
+
+# Pattern definitions organized by category
+patterns:
+  # =========================================================================
+  # Technical Identifiers (No conversational value)
+  # =========================================================================
+  
+  - name: IPV4
+    description: "IPv4 address detection"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b'
+
+  - name: IPV6
+    description: "IPv6 address detection"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b'
+      - '\b[0-9a-fA-F]{1,4}::[0-9a-fA-F]{1,4}\b'
+      - '\b2001:db8::[a-fA-F0-9]{1,4}\b'
+      - '\b[0-9a-fA-F]{4}:[0-9a-fA-F]{4}::[0-9a-fA-F]{1,4}\b'
+
+  - name: API_KEY
+    description: "API keys and tokens"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bapi[_-]?key[_-]?[a-zA-Z0-9]{32,}\b'
+      - '\b[a-zA-Z0-9]{32,64}\b(?=.*key)'
+      - '\b(sk|pk)_[a-zA-Z0-9]{24,}\b'
+      - '\bBearer\s+[a-zA-Z0-9\-._~+/]+=*\b'
+
+  # =========================================================================
+  # Financial Identifiers
+  # =========================================================================
+
+  - name: CREDIT_CARD_NUMBER
+    description: "Credit card numbers (Visa, Mastercard, Amex, Discover, etc.)"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})\b'
+
+  # =========================================================================
+  # Government/National IDs (No conversational value)
+  # =========================================================================
+
+  # United States
+  - name: US_SSN
+    description: "US Social Security Number"
+    tier: 1
+    language: "en"
+    country: "US"
+    patterns:
+      - '\b\d{3}-\d{2}-\d{4}\b'
+      - '\b\d{9}\b'
+
+  # Spain
+  - name: ES_NATIONAL_ID
+    description: "Spanish DNI/NIE"
+    tier: 1
+    language: "es"
+    country: "ES"
+    patterns:
+      - '\b[0-9]{8}[A-HJ-NP-TV-Z]\b'
+      - '\b[XYZ][0-9]{7}[A-HJ-NP-TV-Z]\b'
+
+  # Germany
+  - name: DE_TAX_ID
+    description: "German Tax Identification Number"
+    tier: 1
+    language: "de"
+    country: "DE"
+    patterns:
+      - '\b[1-9]\d{1}\s?\d{3}\s?\d{2}\s?\d{3}\b'
+      - '\b[1-9]\d([- ]?\d{4}){2}\b'
+
+  # France
+  - name: FR_SOCIAL_SECURITY
+    description: "French Social Security Number (NIR)"
+    tier: 1
+    language: "fr"
+    country: "FR"
+    patterns:
+      - '\b[1-2]\d{2}(0[1-9]|1[0-2])\d{2}\d{3}\d{3}\d{2}\b'
+
+  # United Kingdom
+  - name: UK_NATIONAL_INSURANCE
+    description: "UK National Insurance Number"
+    tier: 1
+    language: "en"
+    country: "GB"
+    patterns:
+      - '\b[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\s?\d{2}\s?\d{2}\s?\d{2}\s?[A-D]\b'
+
+  # Canada
+  - name: CA_SOCIAL_INSURANCE
+    description: "Canadian Social Insurance Number (SIN)"
+    tier: 1
+    language: "en"
+    country: "CA"
+    patterns:
+      - '\b\d{3}[-\s]?\d{3}[-\s]?\d{3}\b'
+
+  # =========================================================================
+  # Healthcare Identifiers (HIPAA - No conversational value)
+  # =========================================================================
+
+  - name: MEDICAL_RECORD_NUMBER
+    description: "Medical record numbers"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\b(MRN|MR|MED)[-\s]?[0-9]{6,10}\b'
+
+  - name: NATIONAL_PROVIDER_ID
+    description: "NPI numbers (10 digits)"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bNPI[-\s]?[0-9]{10}\b'
+
+  - name: DEA_NUMBER
+    description: "DEA registration numbers"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\b[A-Z]{2}[0-9]{7}\b'
+
+  - name: PATIENT_ID
+    description: "Patient identification numbers"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\b(PATIENT|PT|PID)[-\s]?[0-9]{3,9}\b'
+
+  - name: INSURANCE_ID
+    description: "Health insurance member IDs"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\b[A-Z]{2,4}[0-9]{6,12}\b'
+
+  - name: DIAGNOSIS_CODE
+    description: "ICD-10 diagnosis codes"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\b[A-Z][0-9]{2}\.[0-9X]{1,3}\b'
+
+  # =========================================================================
+  # Business/System Identifiers (No conversational value)
+  # =========================================================================
+
+  - name: EMPLOYEE_ID
+    description: "Employee ID numbers"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bEMP\d{6}\b'
+      - '\b(EMPLOYEE|EID)[-\s]?[0-9]{4,8}\b'
+
+  - name: CUSTOMER_ID
+    description: "Customer identification numbers"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bCUST-[A-Z]{3}-\d{3}\b'
+      - '\b(CUSTOMER|CID)[-\s]?[0-9]{6,10}\b'
+
+  - name: PROJECT_CODE
+    description: "Project codes and identifiers"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '\bPROJ-\d{4}-\d{3}\b'
+      - '\b(PROJECT|PROJ)[-\s]?[A-Z0-9]{4,12}\b'
+
+  # =========================================================================
+  # Contact Information (Partially useful but often sensitive)
+  # =========================================================================
+
+  - name: EMAIL
+    description: "Email addresses"
+    tier: 1
+    language: "universal"
+    patterns:
+      - '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+
+  - name: PHONE
+    description: "Comprehensive phone number detection"
+    tier: 1
+    language: "universal"
+    patterns:
+      # US phone formats
+      - '\([2-9]\d{2}\)\s?\d{3}[-.\s]?\d{4}'
+      - '[2-9]\d{2}[-.\s]\d{3}[-.\s]\d{4}'
+      - '\+1[-.\s]?\d{3}[-.\s]?\d{3}[-.\s]?\d{4}'
+      # International formats
+      - '\+33\s?\d{1}\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}'
+      - '\+(?:44|33|49|81|86|91|61|55|39|34|31|46|47|41|43|32|30)[\s.-]?\d{1,4}[\s.-]?\d{3,4}[\s.-]?\d{3,8}'
+
+  - name: US_PHONE
+    description: "US phone number formats"
+    tier: 1
+    language: "en"
+    country: "US"
+    patterns:
+      - '(?<!\d)(?:\+1[-.\s]?)?\([2-9]\d{2}\)\s?[0-9]\d{2}[-.\s]?\d{4}(?!\d)'
+      - '\b(?:\+1[-.\s]?)?[2-9]\d{2}[-.\s][0-9]\d{2}[-.\s]\d{4}\b'
+
+  - name: FR_PHONE_NUMBER
+    description: "French phone number formats"
+    tier: 1
+    language: "fr"
+    country: "FR"
+    patterns:
+      - '\b0\s?[1-9](?:(?:\s?\d{2}){4}|\s?(?:\d{2}\s){3}\d{2})\b'
+
+  - name: INTERNATIONAL_PHONE
+    description: "International phone numbers with country codes"
+    tier: 2
+    language: "universal"
+    patterns:
+      - '\b\+(?:44|33|49|81|86|91|61|55|39|34|31|46|47|41|43|32|30)[\s.-]?\d{1,4}[\s.-]?\d{3,4}[\s.-]?\d{3,8}\b'

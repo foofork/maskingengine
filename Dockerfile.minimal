@@ -1,0 +1,33 @@
+# Minimal production Dockerfile for MaskingEngine (regex-only)
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy minimal requirements first for better caching
+COPY requirements-minimal.txt .
+RUN pip install --no-cache-dir -r requirements-minimal.txt
+
+# Copy the application code
+COPY maskingengine/ ./maskingengine/
+COPY setup.py .
+COPY README.md .
+
+# Install the package
+RUN pip install -e .
+
+# Create non-root user
+RUN useradd -m -u 1000 maskinguser && chown -R maskinguser:maskinguser /app
+USER maskinguser
+
+# Expose API port
+EXPOSE 8000
+
+# Default command runs the API server in regex-only mode
+CMD ["uvicorn", "maskingengine.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

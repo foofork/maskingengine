@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MaskingEngine Configuration Schema",
+  "description": "Configuration schema for the MaskingEngine PII sanitization system",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "type": "string",
+      "description": "Name of a predefined profile to use as base configuration"
+    },
+    "regex_packs": {
+      "type": "array",
+      "description": "List of regex pattern packs to load",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 0
+    },
+    "ner_models": {
+      "type": "array",
+      "description": "List of NER model IDs to use",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 0
+    },
+    "mask_types": {
+      "type": "array",
+      "description": "Types of PII to mask (if empty, all detected types are masked)",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 0
+    },
+    "regex_only": {
+      "type": "boolean",
+      "description": "Use only regex patterns, disable NER models",
+      "default": false
+    },
+    "min_confidence": {
+      "type": "number",
+      "description": "Minimum confidence threshold for NER detections",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.5
+    },
+    "whitelist": {
+      "type": "array",
+      "description": "List of terms to exclude from masking",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 0
+    },
+    "strict_validation": {
+      "type": "boolean",
+      "description": "Enable strict validation (e.g., Luhn check for credit cards)",
+      "default": true
+    },
+    "placeholder_prefix": {
+      "type": "string",
+      "description": "Prefix for masked placeholders",
+      "default": "<<"
+    },
+    "placeholder_suffix": {
+      "type": "string",
+      "description": "Suffix for masked placeholders",
+      "default": ">>"
+    },
+    "streaming": {
+      "type": "object",
+      "description": "Streaming configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "chunk_size": {
+          "type": "integer",
+          "description": "Chunk size in bytes for streaming mode",
+          "minimum": 512,
+          "default": 4096
+        }
+      }
+    },
+    "rate_limiting": {
+      "type": "object",
+      "description": "Rate limiting configuration (API only)",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "requests_per_minute": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 60
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,80 @@
+# Template for adding new NER models to MaskingEngine
+# Copy this file to models.yaml and customize for your models
+
+models:
+  - id: your-model-id  # Unique identifier for the model
+    name: "Human Readable Model Name"
+    version: "1.0"  # Model version
+    type: transformer  # Model type: transformer, spacy, custom
+    provider: huggingface  # Provider: huggingface, spacy, local, custom
+    model_path: "organization/model-name"  # Path or identifier for loading
+    
+    # List of entity types this model can detect
+    supported_entities:
+      - NAME
+      - EMAIL
+      - PHONE
+      - ADDRESS
+      - SSN
+      - CREDIT_CARD
+      # Add more as supported by your model
+    
+    # ISO 639-1 language codes supported
+    languages:
+      - en  # English
+      - es  # Spanish
+      # Add more languages
+    
+    description: "Brief description of the model and its capabilities"
+    min_confidence_recommended: 0.5  # Recommended confidence threshold
+    
+    # Optional fields:
+    requires_gpu: false  # Whether GPU is required
+    model_size_mb: 250  # Approximate model size
+    license: "apache-2.0"  # Model license
+    
+    # Custom configuration (model-specific)
+    custom_config:
+      max_sequence_length: 512
+      batch_size: 32
+      # Add any model-specific configuration
+
+# Additional examples:
+
+  - id: spacy-en-pii
+    name: "spaCy English PII"
+    version: "3.5"
+    type: spacy
+    provider: spacy
+    model_path: "en_core_web_lg"
+    supported_entities:
+      - PERSON
+      - ORG
+      - GPE
+      - DATE
+      - MONEY
+    languages:
+      - en
+    description: "spaCy large English model with PII detection"
+    min_confidence_recommended: 0.7
+
+  - id: custom-medical-ner
+    name: "Medical Entity Recognizer"
+    version: "2.0"
+    type: custom
+    provider: local
+    model_path: "./models/medical_ner_v2.pt"
+    supported_entities:
+      - PATIENT_NAME
+      - MEDICAL_RECORD_NUMBER
+      - DIAGNOSIS_CODE
+      - MEDICATION
+      - PROVIDER_NAME
+    languages:
+      - en
+    description: "Custom NER model for medical records"
+    min_confidence_recommended: 0.8
+    requires_gpu: true
+    custom_config:
+      vocab_file: "./models/medical_vocab.txt"
+      label_map: "./models/medical_labels.json"

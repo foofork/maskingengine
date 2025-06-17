@@ -1,0 +1,9 @@
+# Core dependencies for MaskingEngine
+pyyaml>=6.0
+transformers>=4.21.0
+torch>=1.12.0
+click>=8.0.0
+fastapi>=0.68.0
+uvicorn>=0.15.0
+pydantic>=1.8.0
+requests>=2.25.0

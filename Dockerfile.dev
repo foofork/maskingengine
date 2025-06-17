@@ -1,0 +1,46 @@
+# Development Dockerfile for MaskingEngine
+FROM python:3.9
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies and development tools
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    git \
+    vim \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js for claude-flow
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+# Copy all requirements
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+# Copy package.json and install Node dependencies
+COPY package.json package-lock.json* ./
+RUN npm install
+
+# Copy the entire project
+COPY . .
+
+# Install the package in editable mode
+RUN pip install -e .
+
+# Create non-root user with same UID as host user (for development)
+RUN useradd -m -u 1000 maskinguser && chown -R maskinguser:maskinguser /app
+USER maskinguser
+
+# Set environment for development
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Expose ports for API and documentation
+EXPOSE 8000 8001
+
+# Default command for development (can be overridden)
+CMD ["bash"]

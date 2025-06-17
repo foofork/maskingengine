@@ -1,0 +1,36 @@
+# NER Model Registry for MaskingEngine
+# This file registers available NER models (not bundled)
+
+models:
+  - id: distilbert-multilingual-pii
+    name: "DistilBERT Multilingual PII"
+    version: "1.0"
+    type: transformer
+    provider: huggingface
+    model_path: "yonigo/distilbert-base-multilingual-cased-pii"
+    supported_entities:
+      - NAME
+      - EMAIL
+      - PHONE
+      - LOCATION
+      - ORGANIZATION
+    languages:
+      - en  # English
+      - es  # Spanish 
+      - fr  # French
+      - de  # German
+      - nl  # Dutch
+      - it  # Italian
+      - pt  # Portuguese
+      - pl  # Polish
+      - tr  # Turkish
+      - ru  # Russian
+      - ar  # Arabic
+      - zh  # Chinese
+      - ja  # Japanese
+      - ko  # Korean
+    description: "Multilingual DistilBERT model fine-tuned for PII detection"
+    min_confidence_recommended: 0.5
+    
+  # Example entries for other models (not included)
+  # Users can add their own models following this format

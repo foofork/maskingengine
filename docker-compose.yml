@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # Production service (regex-only, fast startup)
+  maskingengine:
+    build:
+      context: .
+      dockerfile: Dockerfile.minimal
+    image: maskingengine:minimal
+    container_name: maskingengine-prod
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MASKINGENGINE_REGEX_ONLY=true
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./pattern_packs:/app/pattern_packs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Production service with NER support (slower startup, downloads models on first use)
+  maskingengine-ner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: maskingengine:latest
+    container_name: maskingengine-ner
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./configs:/app/configs:ro
+      - ./pattern_packs:/app/pattern_packs:ro
+      - model_cache:/home/maskinguser/.cache/huggingface
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Development service
+  maskingengine-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: maskingengine:dev
+    container_name: maskingengine-dev
+    ports:
+      - "8001:8000"  # API on different port to avoid conflicts
+      - "8002:8001"  # Documentation server
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      - .:/app:cached
+      - /app/node_modules  # Prevent overwriting node_modules
+      - /app/.venv  # Prevent overwriting virtual environment
+    command: bash -c "uvicorn maskingengine.api.main:app --host 0.0.0.0 --port 8000 --reload"
+    stdin_open: true
+    tty: true
+
+  # Optional: Run tests in container
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: maskingengine:dev
+    container_name: maskingengine-test
+    volumes:
+      - .:/app:cached
+    command: pytest -v --cov=maskingengine
+    profiles:
+      - test
+
+  # Optional: Run linting and type checking
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: maskingengine:dev
+    container_name: maskingengine-lint
+    volumes:
+      - .:/app:cached
+    command: bash -c "black --check . && flake8 . && mypy maskingengine"
+    profiles:
+      - lint
+
+volumes:
+  model_cache:

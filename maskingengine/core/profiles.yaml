@@ -1,0 +1,69 @@
+# Sample configuration profiles for MaskingEngine
+# These are optional starting points that can be overridden
+
+minimal:
+  description: "Minimal configuration with only regex patterns"
+  regex_only: true
+  regex_packs:
+    - default
+  strict_validation: false
+  min_confidence: 0.0
+
+standard:
+  description: "Standard configuration with regex and NER"
+  regex_packs:
+    - default
+  ner_models:
+    - distilbert-multilingual-pii
+  min_confidence: 0.5
+  strict_validation: true
+
+# Example industry-specific profiles can be created by users
+# finance-en:
+#   description: "Finance-focused configuration for English"
+#   regex_packs:
+#     - default
+#     - custom  # Add your finance-specific patterns here
+#   ner_models:
+#     - distilbert-multilingual-pii
+#   mask_types:
+#     - CREDIT_CARD
+#     - SSN
+#     - US_SSN
+#     - EMAIL
+#     - PHONE
+#     - NAME
+#   min_confidence: 0.7
+#   strict_validation: true
+#   whitelist:
+#     - "support@company.com"
+#     - "billing@company.com"
+
+# healthcare-en:
+#   description: "Healthcare-focused configuration for English (regex-only)"
+#   regex_only: true
+#   regex_packs:
+#     - default
+#     - custom  # Add your healthcare-specific patterns here
+#   mask_types:
+#     - SSN
+#     - US_SSN
+#     - MEDICAL_RECORD_NUMBER
+#     - INSURANCE_ID
+#     - EMAIL
+#     - PHONE
+#     - NAME
+#     - DATE_OF_BIRTH
+#     - ADDRESS
+#   min_confidence: 0.8
+#   strict_validation: true
+
+high-security:
+  description: "Maximum security with all available patterns and models"
+  regex_packs:
+    - default
+  ner_models:
+    - distilbert-multilingual-pii
+  min_confidence: 0.3  # Lower threshold to catch more
+  strict_validation: true
+  mask_types: []  # Empty means mask all detected types

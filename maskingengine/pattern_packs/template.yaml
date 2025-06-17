@@ -1,0 +1,81 @@
+# Pattern Pack Template for MaskingEngine
+# Copy this file and customize for your organization's needs
+
+# Required metadata section
+meta:
+  name: "your-pack-name"  # Unique identifier for this pack
+  description: "Brief description of what this pattern pack detects"
+  version: "1.0.0"  # Semantic versioning
+  author: "Your Name or Organization"  # Optional but recommended
+  lang: ["en"]  # ISO 639-1 language codes this pack is designed for
+  domain: "general"  # Domain: general, finance, healthcare, legal, etc.
+
+# Pattern definitions
+patterns:
+  # Each pattern entry must have these fields:
+  - label: "PATTERN_TYPE"  # Uppercase label for the detected entity type
+    pattern: 'your-regex-pattern-here'  # The actual regex pattern
+    flags: []  # Optional: regex flags like ["IGNORECASE", "MULTILINE"]
+    description: "What this pattern detects"  # Human-readable description
+    examples:  # Optional but recommended
+      - "example@match.com"
+      - "another-example"
+    
+  # Basic example - Email
+  - label: "EMAIL"
+    pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    flags: ["IGNORECASE"]
+    description: "Email addresses"
+    examples:
+      - "user@example.com"
+      - "john.doe+filter@company.org"
+  
+  # Example with multiple patterns for one type
+  - label: "PHONE"
+    pattern: '\+?1?\s*\(?[0-9]{3}\)?[\s.-]?[0-9]{3}[\s.-]?[0-9]{4}'
+    flags: []
+    description: "US phone numbers"
+    examples:
+      - "+1 (555) 123-4567"
+      - "555-123-4567"
+      - "555.123.4567"
+  
+  # Example with strict pattern
+  - label: "SSN"
+    pattern: '\b[0-9]{3}-[0-9]{2}-[0-9]{4}\b'
+    flags: []
+    description: "US Social Security Numbers"
+    examples:
+      - "123-45-6789"
+  
+  # Example with complex validation
+  - label: "CREDIT_CARD"
+    pattern: '\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\b'
+    flags: []
+    description: "Credit card numbers (Visa, Mastercard, Amex, Discover)"
+    examples:
+      - "4111111111111111"  # Visa test card
+      - "5500000000000004"  # Mastercard test card
+  
+  # Domain-specific example
+  - label: "EMPLOYEE_ID"
+    pattern: '\bEMP[0-9]{6}\b'
+    flags: []
+    description: "Internal employee IDs"
+    examples:
+      - "EMP123456"
+      - "EMP000001"
+
+# Optional sections:
+
+# Validation rules (future enhancement)
+validation:
+  - type: "CREDIT_CARD"
+    validator: "luhn"  # Use Luhn algorithm
+  - type: "EMAIL"
+    validator: "email_format"  # Validate email format
+
+# Performance hints (future enhancement)
+performance:
+  compile_patterns: true  # Pre-compile regex patterns
+  cache_size: 1000  # Number of results to cache
