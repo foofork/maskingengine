@@ -3,13 +3,13 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 import yaml
 
 try:
     import jsonschema
 except ImportError:
-    jsonschema = None
+    jsonschema = None  # type: ignore[assignment]
 
 
 class ConfigValidator:
@@ -24,7 +24,7 @@ class ConfigValidator:
         self.base_path = Path(base_path) if base_path else Path(__file__).parent.parent
         self.schema = self._load_schema()
 
-    def _load_schema(self) -> Dict:
+    def _load_schema(self) -> Dict[str, Any]:
         """Load the configuration schema."""
         schema_path = Path(__file__).parent / "config.schema.json"
         try:
@@ -165,7 +165,9 @@ class ConfigValidator:
         schema_valid, schema_errors = self.validate_schema(config)
         result["schema_valid"] = schema_valid
         if not schema_valid:
-            result["errors"].extend(schema_errors)
+            errors_list = result["errors"]
+            assert isinstance(errors_list, list)
+            errors_list.extend(schema_errors)
             result["valid"] = False
 
         # Integrity validation
@@ -175,9 +177,13 @@ class ConfigValidator:
         # Separate warnings from errors
         for issue in integrity_issues:
             if issue.startswith("Warning:"):
-                result["warnings"].append(issue)
+                warnings_list = result["warnings"]
+                assert isinstance(warnings_list, list)
+                warnings_list.append(issue)
             else:
-                result["errors"].append(issue)
+                errors_list = result["errors"]
+                assert isinstance(errors_list, list)
+                errors_list.append(issue)
                 result["valid"] = False
 
         return result

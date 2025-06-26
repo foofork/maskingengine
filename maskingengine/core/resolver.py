@@ -3,7 +3,7 @@
 import os
 import json
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 import yaml
 
 from .validator import ConfigValidator
@@ -34,7 +34,7 @@ class ConfigResolver:
             base_path: Base directory for finding profiles and resources
         """
         self.base_path = Path(base_path) if base_path else Path(__file__).parent.parent
-        self.validator = ConfigValidator(self.base_path)
+        self.validator = ConfigValidator(str(self.base_path))
         self.profiles = self._load_profiles()
 
     def _load_profiles(self) -> Dict[str, Dict]:
@@ -112,7 +112,7 @@ class ConfigResolver:
 
         return None
 
-    def load_user_config(self, config_path: Optional[str] = None) -> Dict:
+    def load_user_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
         """Load user configuration from file.
 
         Args:
@@ -130,7 +130,8 @@ class ConfigResolver:
                 if resolved_path.suffix == ".json":
                     return json.load(f)
                 else:
-                    return yaml.safe_load(f) or {}
+                    result = yaml.safe_load(f)
+                    return result if result is not None else {}
         except Exception as e:
             print(f"Warning: Could not load config from {resolved_path}: {e}")
             return {}

@@ -197,7 +197,7 @@ rehydration_storage = RehydrationStorage()
 rehydration_pipeline = None  # Will be initialized with first sanitizer
 
 
-def get_rehydration_pipeline():
+def get_rehydration_pipeline() -> RehydrationPipeline:
     """Get or create rehydration pipeline."""
     global rehydration_pipeline
     if rehydration_pipeline is None:
@@ -208,7 +208,7 @@ def get_rehydration_pipeline():
 
 # API Endpoints
 @app.get("/", response_model=Dict[str, Any])
-async def root():
+async def root() -> Dict[str, Any]:
     """Root endpoint providing API information."""
     return {
         "service": "MaskingEngine API",
@@ -230,7 +230,7 @@ async def root():
 
 
 @app.get("/health", response_model=HealthResponse)
-async def health_check():
+async def health_check() -> HealthResponse:
     """Health check endpoint."""
     try:
         # Test basic functionality
@@ -248,7 +248,7 @@ async def health_check():
 
 
 @app.post("/sanitize", response_model=SanitizeResponse)
-async def sanitize_content(request: SanitizeRequest):
+async def sanitize_content(request: SanitizeRequest) -> SanitizeResponse:
     """Sanitize content by masking PII entities."""
     try:
         # Create configuration from request
@@ -281,7 +281,7 @@ async def sanitize_content(request: SanitizeRequest):
 
 
 @app.post("/rehydrate", response_model=RehydrateResponse)
-async def rehydrate_content(request: RehydrateRequest):
+async def rehydrate_content(request: RehydrateRequest) -> RehydrateResponse:
     """Rehydrate masked content using provided mask map."""
     try:
         rehydrator = Rehydrator()
@@ -323,7 +323,7 @@ async def rehydrate_content(request: RehydrateRequest):
 
 
 @app.post("/session/sanitize", response_model=SessionSanitizeResponse)
-async def session_sanitize(request: SessionSanitizeRequest):
+async def session_sanitize(request: SessionSanitizeRequest) -> SessionSanitizeResponse:
     """Sanitize content and store mask map for later rehydration."""
     try:
         # Create configuration from request
@@ -366,7 +366,7 @@ async def session_sanitize(request: SessionSanitizeRequest):
 
 
 @app.post("/session/rehydrate", response_model=RehydrateResponse)
-async def session_rehydrate(request: SessionRehydrateRequest):
+async def session_rehydrate(request: SessionRehydrateRequest) -> RehydrateResponse:
     """Rehydrate content using stored session mask map."""
     try:
         pipeline = get_rehydration_pipeline()
@@ -399,7 +399,7 @@ async def session_rehydrate(request: SessionRehydrateRequest):
 
 
 @app.delete("/session/{session_id}")
-async def delete_session(session_id: str):
+async def delete_session(session_id: str) -> Dict[str, str]:
     """Delete stored session and cleanup mask map."""
     try:
         pipeline = get_rehydration_pipeline()
@@ -421,7 +421,7 @@ async def delete_session(session_id: str):
 
 
 @app.get("/sessions")
-async def list_sessions():
+async def list_sessions() -> Dict[str, Any]:
     """List all active sessions."""
     try:
         pipeline = get_rehydration_pipeline()
@@ -434,7 +434,7 @@ async def list_sessions():
 
 
 @app.post("/config/validate", response_model=ConfigValidationResponse)
-async def validate_config(request: ConfigValidationRequest):
+async def validate_config(request: ConfigValidationRequest) -> ConfigValidationResponse:
     """Validate configuration object or profile."""
     try:
         resolver = ConfigResolver()
@@ -456,7 +456,7 @@ async def validate_config(request: ConfigValidationRequest):
 
 
 @app.get("/discover", response_model=DiscoveryResponse)
-async def discover_capabilities():
+async def discover_capabilities() -> DiscoveryResponse:
     """Discover all available models, pattern packs, and profiles."""
     try:
         # Get models
@@ -521,7 +521,7 @@ async def discover_capabilities():
 
 
 @app.get("/models", response_model=List[ModelInfo])
-async def list_models():
+async def list_models() -> List[ModelInfo]:
     """List available NER models."""
     try:
         models = []
@@ -555,7 +555,7 @@ async def list_models():
 
 
 @app.get("/pattern-packs", response_model=List[PatternPackInfo])
-async def list_pattern_packs():
+async def list_pattern_packs() -> List[PatternPackInfo]:
     """List available pattern packs."""
     try:
         pattern_packs = []
@@ -587,7 +587,7 @@ async def list_pattern_packs():
 
 
 @app.get("/profiles", response_model=List[ProfileInfo])
-async def list_profiles():
+async def list_profiles() -> List[ProfileInfo]:
     """List available configuration profiles."""
     try:
         profiles = []

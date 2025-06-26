@@ -53,7 +53,7 @@ class Sanitizer:
             elif format == "html" or (
                 format is None and isinstance(input_data, str) and self._is_html(input_data)
             ):
-                result = self._sanitize_html(input_data)
+                result = self._sanitize_html(str(input_data))
             else:
                 result = self._sanitize_text(str(input_data))
 
