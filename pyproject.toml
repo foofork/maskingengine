@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "maskingengine"
-version = "1.2.2"
+version = "1.2.3"
 authors = [
     {name = "MaskingEngine Team", email = "contact@maskingengine.dev"}
 ]
@@ -47,10 +47,12 @@ dev = [
     "flake8>=3.8",
     "mypy>=0.910",
     "pre-commit>=2.15",
+    "httpx>=0.23.0",
 ]
 api = [
     "fastapi>=0.68.0",
     "uvicorn>=0.15.0",
+    "httpx>=0.23.0",
 ]
 minimal = [
     "pyyaml>=6.0",
