@@ -597,7 +597,9 @@ def list_packs() -> None:
 @click.option("--config", type=click.Path(exists=True), help="Path to configuration file")
 @click.option("--profile", help="Use a predefined configuration profile")
 @click.option("--regex-only", is_flag=True, help="Use regex-only mode")
-def test_sample(sample_text: str, config: Optional[str], profile: Optional[str], regex_only: bool) -> None:
+def test_sample(
+    sample_text: str, config: Optional[str], profile: Optional[str], regex_only: bool
+) -> None:
     """Test masking on a sample text string.
 
     Examples:
