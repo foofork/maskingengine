@@ -9,7 +9,7 @@ long_description = readme_path.read_text(encoding="utf-8") if readme_path.exists
 
 # Read version from package
 version_path = Path(__file__).parent / "maskingengine" / "__init__.py"
-version = "1.2.0"
+version = "1.2.1"
 if version_path.exists():
     for line in version_path.read_text().splitlines():
         if line.startswith("__version__"):

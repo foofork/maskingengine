@@ -1,6 +1,6 @@
 """MaskingEngine: A local-first, privacy-by-design PII sanitizer system."""
 
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 from .sanitizer import Sanitizer
 from .config import Config
