@@ -345,7 +345,7 @@ maskingengine test                           # Run comprehensive tests
 
 ---
 
-## 🆕 What's New in v1.01.00
+## 🆕 What's New in v1.2.0
 
 ### Configuration System
 - **Pre-built Profiles**: Ready-to-use configurations for healthcare, minimal processing, and high-security scenarios

@@ -14,7 +14,7 @@ from maskingengine.pipeline import StreamingMaskingSession, StreamingTextProcess
 
 
 @click.group()
-@click.version_option(version="1.01.00", prog_name="maskingengine")
+@click.version_option(version="1.2.0", prog_name="maskingengine")
 def cli():
     """MaskingEngine CLI - Local-first PII sanitization tool.
 

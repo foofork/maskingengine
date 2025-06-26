@@ -21,7 +21,7 @@ class TestCLICommands:
         """Test CLI version display."""
         result = self.runner.invoke(cli, ["--version"])
         assert result.exit_code == 0
-        assert "1.01.00" in result.output
+        assert "1.2.0" in result.output
         assert "maskingengine" in result.output
 
     def test_cli_help(self):
