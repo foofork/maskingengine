@@ -45,7 +45,7 @@ class Sanitizer:
                 )
 
             # Reset mask map for each sanitization
-            self.mask_map: Dict[str, str] = {}
+            self.mask_map = {}
 
             # Parse input based on format
             if format == "json" or (format is None and isinstance(input_data, dict)):

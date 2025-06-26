@@ -2,8 +2,11 @@
 
 import json
 import re
-from typing import Dict, Union, Any, Optional, List, Tuple
+from typing import Dict, Union, Any, Optional, List, Tuple, TYPE_CHECKING
 from pathlib import Path
+
+if TYPE_CHECKING:
+    from .sanitizer import Sanitizer
 
 
 class Rehydrator:
@@ -214,7 +217,8 @@ class RehydrationStorage:
 
         try:
             with open(file_path, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+                return data if isinstance(data, dict) else None
         except (json.JSONDecodeError, IOError):
             return None
 
@@ -249,16 +253,20 @@ class RehydrationStorage:
         import time
 
         cutoff_time = time.time() - (max_age_hours * 3600)
+        deleted_count = 0
 
         for file_path in self.storage_dir.glob("*.json"):
             if file_path.stat().st_mtime < cutoff_time:
                 file_path.unlink()
+                deleted_count += 1
+        
+        return deleted_count
 
 
 class RehydrationPipeline:
     """High-level pipeline for sanitization with rehydration support."""
 
-    def __init__(self, sanitizer, storage: Optional[RehydrationStorage] = None) -> None:
+    def __init__(self, sanitizer: "Sanitizer", storage: Optional[RehydrationStorage] = None) -> None:
         """
         Initialize pipeline with sanitizer and optional storage.
 
