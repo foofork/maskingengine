@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Local-first PII redaction for LLM integration - mask before AI processing, restore after. Uses default patterns + multilingual NER, no network calls."
 readme = "README.md"
-license = "MIT"
+license = {file = "LICENSE"}
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 4 - Beta",
