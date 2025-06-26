@@ -489,13 +489,15 @@ def validate_config(config_file: Optional[str], profile: Optional[str]) -> None:
         resolver = ConfigResolver()
 
         # Load user config if provided
-        user_config = {}
+        user_config: Dict[str, Any] = {}
         if config_file:
             with open(config_file, "r") as f:
                 if config_file.endswith(".json"):
-                    user_config = json.load(f)
+                    loaded = json.load(f)
+                    user_config = loaded if isinstance(loaded, dict) else {}
                 else:
-                    user_config = yaml.safe_load(f) or {}
+                    loaded = yaml.safe_load(f)
+                    user_config = loaded if isinstance(loaded, dict) else {}
 
         # Resolve and validate
         result = resolver.resolve_and_validate(
@@ -611,13 +613,15 @@ def test_sample(
         resolver = ConfigResolver()
 
         # Load user config if provided
-        user_config = {}
+        user_config: Dict[str, Any] = {}
         if config:
             with open(config, "r") as f:
                 if config.endswith(".json"):
-                    user_config = json.load(f)
+                    loaded = json.load(f)
+                    user_config = loaded if isinstance(loaded, dict) else {}
                 else:
-                    user_config = yaml.safe_load(f) or {}
+                    loaded = yaml.safe_load(f)
+                    user_config = loaded if isinstance(loaded, dict) else {}
 
         # Add CLI overrides
         if regex_only:
