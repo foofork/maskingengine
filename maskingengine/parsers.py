@@ -9,7 +9,9 @@ from typing import List, Dict, Any, Union, Optional
 class TextChunk:
     """Simple text chunk with position information."""
 
-    def __init__(self, text: str, offset: int = 0, metadata: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(
+        self, text: str, offset: int = 0, metadata: Optional[Dict[str, Any]] = None
+    ) -> None:
         self.text = text
         self.offset = offset
         self.metadata = metadata or {}
