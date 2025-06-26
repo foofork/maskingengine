@@ -259,14 +259,16 @@ class RehydrationStorage:
             if file_path.stat().st_mtime < cutoff_time:
                 file_path.unlink()
                 deleted_count += 1
-        
+
         return deleted_count
 
 
 class RehydrationPipeline:
     """High-level pipeline for sanitization with rehydration support."""
 
-    def __init__(self, sanitizer: "Sanitizer", storage: Optional[RehydrationStorage] = None) -> None:
+    def __init__(
+        self, sanitizer: "Sanitizer", storage: Optional[RehydrationStorage] = None
+    ) -> None:
         """
         Initialize pipeline with sanitizer and optional storage.
 
