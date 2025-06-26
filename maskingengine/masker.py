@@ -1,19 +1,19 @@
 """Simplified masker module for <<TYPE_HASH>> replacement."""
 
-from typing import List, Tuple
+from typing import List, Tuple, Optional, Dict
 from .config import Config
 
 
 class Masker:
     """Simple masker that creates configurable placeholders."""
 
-    def __init__(self, type_hashes: dict = None, config: Config = None):
+    def __init__(self, type_hashes: Optional[Dict[str, str]] = None, config: Optional[Config] = None) -> None:
         self.type_hashes = type_hashes or Config.TYPE_HASHES
         self.type_counters = {}
         self.config = config or Config()
 
     def mask(
-        self, text: str, detections: List[Tuple[str, str, int, int]], mask_map: dict = None
+        self, text: str, detections: List[Tuple[str, str, int, int]], mask_map: Optional[Dict[str, str]] = None
     ) -> str:
         """Apply masks to text using deterministic placeholders."""
         if not detections:

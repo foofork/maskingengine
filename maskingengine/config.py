@@ -1,6 +1,7 @@
 """Simplified configuration module for minimal architecture."""
 
 from pathlib import Path
+from typing import Optional, List, Dict
 
 
 class Config:
@@ -50,13 +51,13 @@ class Config:
 
     def __init__(
         self,
-        pattern_packs: list = None,
-        whitelist: list = None,
+        pattern_packs: Optional[List[str]] = None,
+        whitelist: Optional[List[str]] = None,
         placeholder_prefix: str = "<<",
-        min_confidence: float = None,
+        min_confidence: Optional[float] = None,
         strict_validation: bool = True,
         regex_only: bool = False,
-    ):
+    ) -> None:
         """Initialize configuration with customizable options."""
         # Pattern pack configuration
         self.pattern_packs = pattern_packs or ["default"]
@@ -82,7 +83,7 @@ class Config:
         # Build combined patterns from packs
         self.PATTERNS = self._build_patterns()
 
-    def _build_patterns(self):
+    def _build_patterns(self) -> Dict[str, List[str]]:
         """Build regex patterns purely from YAML pattern packs."""
         combined_patterns = {}
 

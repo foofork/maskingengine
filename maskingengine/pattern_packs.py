@@ -20,7 +20,7 @@ class PatternRule:
     patterns: List[str]
     compiled_patterns: Optional[List[re.Pattern]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Compile regex patterns after initialization."""
         if self.patterns and not self.compiled_patterns:
             self.compiled_patterns = []
@@ -58,7 +58,7 @@ class PatternPack:
 class PatternPackLoader:
     """Loads and manages YAML pattern packs."""
 
-    def __init__(self, patterns_dir: Optional[str] = None):
+    def __init__(self, patterns_dir: Optional[str] = None) -> None:
         """Initialize with patterns directory."""
         if patterns_dir is None:
             # Default to package pattern_packs directory
@@ -176,7 +176,7 @@ class PatternPackLoader:
         return packs
 
     def get_combined_patterns(
-        self, pack_names: List[str], language: str = None, max_tier: int = None
+        self, pack_names: List[str], language: Optional[str] = None, max_tier: Optional[int] = None
     ) -> Dict[str, PatternRule]:
         """Get combined patterns from multiple packs with filtering."""
         combined = {}

@@ -3,13 +3,13 @@
 import json
 import re
 import copy
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Optional
 
 
 class TextChunk:
     """Simple text chunk with position information."""
 
-    def __init__(self, text: str, offset: int = 0, metadata: Dict = None):
+    def __init__(self, text: str, offset: int = 0, metadata: Optional[Dict[str, Any]] = None) -> None:
         self.text = text
         self.offset = offset
         self.metadata = metadata or {}
@@ -62,7 +62,7 @@ class JSONParser:
         return chunks
 
     @staticmethod
-    def _extract_values(obj: Any, chunks: List[TextChunk], path: List):
+    def _extract_values(obj: Any, chunks: List[TextChunk], path: List[Union[str, int]]) -> None:
         """Extract string values recursively."""
         if isinstance(obj, str):
             chunks.append(
@@ -87,7 +87,7 @@ class JSONParser:
         return result
 
     @staticmethod
-    def _set_by_path(obj: Any, path: List, value: str):
+    def _set_by_path(obj: Any, path: List[Union[str, int]], value: str) -> None:
         """Set value in nested structure by path."""
         current = obj
         for key in path[:-1]:
