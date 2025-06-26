@@ -128,10 +128,11 @@ class ConfigResolver:
         try:
             with open(resolved_path, "r") as f:
                 if resolved_path.suffix == ".json":
-                    return json.load(f)
+                    result = json.load(f)
+                    return result if isinstance(result, dict) else {}
                 else:
                     result = yaml.safe_load(f)
-                    return result if result is not None else {}
+                    return result if isinstance(result, dict) else {}
         except Exception as e:
             print(f"Warning: Could not load config from {resolved_path}: {e}")
             return {}

@@ -63,7 +63,7 @@ def mask(
     whitelist: tuple,
     stdin: bool,
     profile: Optional[str],
-):
+) -> None:
     """Mask PII in text, JSON, or HTML content.
 
     Examples:
@@ -164,7 +164,7 @@ def mask(
 
 @cli.command()
 @click.option("--session-id", help="Session ID for rehydration testing")
-def test(session_id: Optional[str]):
+def test(session_id: Optional[str]) -> None:
     """Test MaskingEngine functionality including optional rehydration."""
     click.echo("🧪 Testing MaskingEngine...")
 
@@ -216,7 +216,7 @@ def test(session_id: Optional[str]):
 @click.argument("masked_file", type=click.Path(exists=True))
 @click.argument("mask_map_file", type=click.Path(exists=True))
 @click.option("-o", "--output", type=click.Path(), help="Output file path (defaults to stdout)")
-def rehydrate(masked_file: str, mask_map_file: str, output: Optional[str]):
+def rehydrate(masked_file: str, mask_map_file: str, output: Optional[str]) -> None:
     """Rehydrate masked content using a stored mask map.
 
     Examples:
@@ -246,7 +246,10 @@ def rehydrate(masked_file: str, mask_map_file: str, output: Optional[str]):
 
         # Output result
         if output:
-            Path(output).write_text(rehydrated_content)
+            if isinstance(rehydrated_content, dict):
+                Path(output).write_text(json.dumps(rehydrated_content, indent=2))
+            else:
+                Path(output).write_text(str(rehydrated_content))
             click.echo(f"✅ Rehydrated content written to: {output}")
         else:
             click.echo(rehydrated_content)
@@ -297,7 +300,7 @@ def session_sanitize(
     pattern_packs: tuple,
     whitelist: tuple,
     stdin: bool,
-):
+) -> None:
     """Sanitize content and store mask map for later rehydration.
 
     Examples:
@@ -342,12 +345,16 @@ def session_sanitize(
         # Optionally export mask map
         if mask_map_output:
             mask_map = storage.load_mask_map(session_id)
-            Path(mask_map_output).write_text(json.dumps(mask_map, indent=2))
-            click.echo(f"💾 Mask map written to: {mask_map_output}")
+            if mask_map:
+                Path(mask_map_output).write_text(json.dumps(mask_map, indent=2))
+                click.echo(f"💾 Mask map written to: {mask_map_output}")
+            else:
+                click.echo(f"⚠️  Warning: No mask map found for session '{session_id}'", err=True)
 
         # Display summary
         mask_map = storage.load_mask_map(session_id)
-        click.echo(f"🔍 Session '{session_id}' created with {len(mask_map)} PII entities", err=True)
+        entity_count = len(mask_map) if mask_map else 0
+        click.echo(f"🔍 Session '{session_id}' created with {entity_count} PII entities", err=True)
         click.echo(f"📁 Mask map stored at: {storage_path}", err=True)
 
     except Exception as e:
@@ -363,7 +370,7 @@ def session_sanitize(
 @click.option("--cleanup", is_flag=True, help="Delete session after rehydration")
 def session_rehydrate(
     masked_file: Optional[str], session_id: str, output: Optional[str], stdin: bool, cleanup: bool
-):
+) -> None:
     """Rehydrate content using stored session mask map.
 
     Examples:
@@ -423,7 +430,7 @@ def session_rehydrate(
 
 
 @cli.command()
-def sessions():
+def sessions() -> None:
     """List all stored rehydration sessions."""
     try:
         storage = RehydrationStorage()
@@ -448,7 +455,7 @@ def sessions():
     default=24,
     help="Maximum age in hours before deletion (default: 24)",
 )
-def cleanup_sessions(max_age_hours: int):
+def cleanup_sessions(max_age_hours: int) -> None:
     """Clean up old rehydration sessions."""
     try:
         storage = RehydrationStorage()
@@ -471,7 +478,7 @@ def cleanup_sessions(max_age_hours: int):
 @cli.command(name="validate-config")
 @click.argument("config_file", type=click.Path(exists=True), required=False)
 @click.option("--profile", help="Validate with a specific profile")
-def validate_config(config_file: Optional[str], profile: Optional[str]):
+def validate_config(config_file: Optional[str], profile: Optional[str]) -> None:
     """Validate configuration file or current configuration.
 
     Examples:
@@ -522,7 +529,7 @@ def validate_config(config_file: Optional[str], profile: Optional[str]):
 
 
 @cli.command(name="list-models")
-def list_models():
+def list_models() -> None:
     """List available NER models from the model registry."""
     try:
         # Look for models.yaml in core config directory
@@ -556,7 +563,7 @@ def list_models():
 
 
 @cli.command(name="list-packs")
-def list_packs():
+def list_packs() -> None:
     """List available pattern packs."""
     try:
         from maskingengine.pattern_packs import PatternPackLoader
@@ -590,7 +597,7 @@ def list_packs():
 @click.option("--config", type=click.Path(exists=True), help="Path to configuration file")
 @click.option("--profile", help="Use a predefined configuration profile")
 @click.option("--regex-only", is_flag=True, help="Use regex-only mode")
-def test_sample(sample_text: str, config: Optional[str], profile: Optional[str], regex_only: bool):
+def test_sample(sample_text: str, config: Optional[str], profile: Optional[str], regex_only: bool) -> None:
     """Test masking on a sample text string.
 
     Examples:
@@ -661,7 +668,7 @@ def test_sample(sample_text: str, config: Optional[str], profile: Optional[str],
 
 
 @cli.command(name="getting-started")
-def getting_started():
+def getting_started() -> None:
     """Interactive guide to get started with MaskingEngine."""
     click.echo("🚀 Welcome to MaskingEngine - Local-first PII Sanitization")
     click.echo("=" * 60)
@@ -708,7 +715,7 @@ def getting_started():
 
 
 @cli.command(name="list-profiles")
-def list_profiles():
+def list_profiles() -> None:
     """List available configuration profiles."""
     try:
         from maskingengine.core import ConfigResolver

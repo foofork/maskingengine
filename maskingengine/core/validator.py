@@ -29,7 +29,8 @@ class ConfigValidator:
         schema_path = Path(__file__).parent / "config.schema.json"
         try:
             with open(schema_path, "r") as f:
-                return json.load(f)
+                result = json.load(f)
+                return result if isinstance(result, dict) else {}
         except FileNotFoundError:
             return {}
 

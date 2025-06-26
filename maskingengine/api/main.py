@@ -524,7 +524,7 @@ async def discover_capabilities() -> DiscoveryResponse:
 async def list_models() -> List[ModelInfo]:
     """List available NER models."""
     try:
-        models = []
+        models: List[ModelInfo] = []
         models_file = Path(__file__).parent.parent / "core" / "models.yaml"
 
         if not models_file.exists():
