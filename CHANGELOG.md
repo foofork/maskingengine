@@ -5,6 +5,29 @@ All notable changes to MaskingEngine will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-06-26
+
+### Added
+- **Configuration Profiles**: Pre-configured profiles (minimal, standard, healthcare-en, high-security)
+- **Profile-based CLI**: Support for `--profile` flag in CLI commands
+- **Enhanced Pattern Packs**: Version 2.0.0 pattern pack format with improved organization
+- **Test Coverage**: Comprehensive test suite achieving 72% coverage
+
+### Fixed
+- **Cross-platform Compatibility**: Fixed Unicode encoding issues on Windows
+- **Sanitizer API**: Corrected profile parameter usage to use ConfigResolver pattern
+- **GitHub Actions**: Fixed test workflows for all platforms (Ubuntu, Windows, macOS)
+- **PyPI Publishing**: Resolved packaging configuration for Python 3.8 compatibility
+
+### Changed
+- **Version Update**: Updated from 1.01.00 to 1.2.0 following semantic versioning
+- **Test Matrix**: Optimized CI/CD to test key Python versions (3.8, 3.11) on all platforms
+- **Dependencies**: Added httpx to dev dependencies for test client support
+
+### Improved
+- **Documentation**: Updated README with configuration profiles table and examples
+- **Error Messages**: Replaced Unicode emojis with text markers for better compatibility
+
 ## [1.0.0] - 2024-01-15
 
 ### Added
