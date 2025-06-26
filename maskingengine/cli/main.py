@@ -4,7 +4,7 @@ import json
 import sys
 import yaml
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any
 
 import click
 
@@ -87,7 +87,7 @@ def mask(
             resolver = ConfigResolver()
 
             # Build user config from CLI overrides
-            user_config = {}
+            user_config: Dict[str, Any] = {}
             if pattern_packs:
                 user_config["regex_packs"] = list(pattern_packs)
             if whitelist:
