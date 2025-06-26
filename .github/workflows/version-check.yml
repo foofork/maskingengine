@@ -1,0 +1,88 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    
+    - name: Check version consistency
+      run: |
+        # Extract version from different sources
+        PYPROJECT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+        INIT_VERSION=$(grep '^__version__ = ' maskingengine/__init__.py | sed 's/__version__ = "\(.*\)"/\1/')
+        SETUP_VERSION=$(grep '^version = ' setup.py | sed 's/version = "\(.*\)"/\1/')
+        
+        echo "pyproject.toml version: $PYPROJECT_VERSION"
+        echo "maskingengine/__init__.py version: $INIT_VERSION"
+        echo "setup.py version: $SETUP_VERSION"
+        
+        # Check if all versions match
+        if [ "$PYPROJECT_VERSION" != "$INIT_VERSION" ] || [ "$PYPROJECT_VERSION" != "$SETUP_VERSION" ]; then
+          echo "❌ Version mismatch detected!"
+          echo "All version declarations must match exactly."
+          exit 1
+        fi
+        
+        echo "✅ All version declarations are consistent: $PYPROJECT_VERSION"
+    
+    - name: Check if version was bumped (PR only)
+      if: github.event_name == 'pull_request'
+      run: |
+        # Get the base branch version
+        git checkout ${{ github.event.pull_request.base.sha }}
+        BASE_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+        
+        # Get the PR version
+        git checkout ${{ github.event.pull_request.head.sha }}
+        PR_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+        
+        echo "Base version: $BASE_VERSION"
+        echo "PR version: $PR_VERSION"
+        
+        if [ "$BASE_VERSION" = "$PR_VERSION" ]; then
+          echo "⚠️  Version not bumped in this PR"
+          echo "Consider bumping the version if this PR introduces changes that warrant a new release"
+        else
+          echo "✅ Version bumped from $BASE_VERSION to $PR_VERSION"
+        fi
+    
+    - name: Validate semantic versioning
+      run: |
+        VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+        
+        # Check if version follows semantic versioning (X.Y.Z or X.Y.Z-suffix)
+        if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$'; then
+          echo "❌ Version '$VERSION' does not follow semantic versioning format (X.Y.Z)"
+          exit 1
+        fi
+        
+        echo "✅ Version '$VERSION' follows semantic versioning format"
+    
+    - name: Check for unreleased changes
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+        
+        # Check if this version tag already exists
+        if git tag | grep -q "^v$VERSION$"; then
+          echo "⚠️  Tag v$VERSION already exists"
+          echo "Consider creating a release for the current version or bump the version for new changes"
+        else
+          echo "✅ Version $VERSION is ready for release"
+          echo "Create a release with: gh release create v$VERSION"
+        fi

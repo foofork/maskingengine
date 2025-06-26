@@ -10,6 +10,7 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -18,7 +19,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -27,33 +28,61 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e .[dev]
 
-    - name: Run linting
+    - name: Run code quality checks
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       run: |
-        flake8 maskingengine --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 maskingengine --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        black --check .
+        flake8 .
+        mypy maskingengine/
 
-    - name: Run tests
+    - name: Run full test suite
       run: |
         pytest tests/ -v --cov=maskingengine --cov-report=xml
 
-    - name: Test package import and basic functionality
+    - name: Test package functionality
       run: |
         python -c "
         from maskingengine import Sanitizer, Config
+        print('✅ Package imports successfully')
+        
+        # Test basic functionality
         sanitizer = Sanitizer()
-        masked, mask_map = sanitizer.sanitize('test@example.com', regex_only=True)
+        masked, mask_map = sanitizer.sanitize('Email: test@example.com')
         assert '<<EMAIL_' in masked
-        print('✅ Basic functionality test passed')
+        print('✅ Basic masking works')
+        
+        # Test profile functionality  
+        sanitizer = Sanitizer(profile='minimal')
+        result = sanitizer.sanitize('Contact john@company.com')
+        assert '<<EMAIL_' in result[0]
+        print('✅ Profile functionality works')
+        
+        # Test configuration system
+        config = Config(regex_only=True, pattern_packs=['default'])
+        sanitizer = Sanitizer(config)
+        result = sanitizer.sanitize('SSN: 123-45-6789')
+        assert '<<US_SSN_' in result[0]
+        print('✅ Configuration system works')
         "
 
-    - name: Test CLI
+    - name: Test CLI functionality
       run: |
+        # Test basic CLI
         echo "test@example.com" | maskingengine mask --stdin --regex-only
+        
+        # Test CLI with profiles
+        maskingengine test-sample "Email: john@example.com" --profile minimal
+        
+        # Test CLI commands
+        maskingengine list-profiles
+        maskingengine list-packs
+        maskingengine --version
 
     - name: Upload coverage to Codecov
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
+        token: ${{ secrets.CODECOV_TOKEN }}
