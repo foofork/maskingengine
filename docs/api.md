@@ -40,7 +40,7 @@ Check API health and configuration status.
 ```json
 {
   "status": "healthy",
-  "version": "1.0.0", 
+  "version": "1.01.00", 
   "ner_enabled": true
 }
 ```
@@ -62,7 +62,7 @@ Get API information and available endpoints.
 ```json
 {
   "service": "MaskingEngine API",
-  "version": "1.0.0",
+  "version": "1.01.00",
   "docs": "/docs",
   "health": "/health",
   "endpoints": {
@@ -364,7 +364,7 @@ export API_HOST="0.0.0.0"          # Host to bind to
 export API_PORT="8000"             # Port to listen on
 export API_TITLE="MaskingEngine API"  # API title
 export API_DESCRIPTION="Local-first PII sanitization service"
-export API_VERSION="1.0.0"        # API version
+export API_VERSION="1.01.00"        # API version
 export CORS_ORIGINS="*"            # CORS allowed origins (comma-separated)
 ```
 
@@ -574,7 +574,7 @@ Discover all available models, pattern packs, and profiles.
   "pattern_packs": [
     {
       "name": "default",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "description": "Default MaskingEngine PII patterns",
       "pattern_count": 16
     },
@@ -630,7 +630,7 @@ List available pattern packs.
 [
   {
     "name": "default",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "Default MaskingEngine PII patterns with universal and language-specific rules",
     "pattern_count": 16
   },
@@ -665,8 +665,8 @@ List available configuration profiles.
     "description": "Healthcare-focused configuration for English (regex-only)"
   },
   {
-    "name": "finance-en",
-    "description": "Finance-focused configuration for English"
+    "name": "high-security",
+    "description": "Maximum security with all available patterns and models"
   }
 ]
 ```

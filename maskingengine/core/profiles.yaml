@@ -39,24 +39,23 @@ standard:
 #     - "support@company.com"
 #     - "billing@company.com"
 
-# healthcare-en:
-#   description: "Healthcare-focused configuration for English (regex-only)"
-#   regex_only: true
-#   regex_packs:
-#     - default
-#     - custom  # Add your healthcare-specific patterns here
-#   mask_types:
-#     - SSN
-#     - US_SSN
-#     - MEDICAL_RECORD_NUMBER
-#     - INSURANCE_ID
-#     - EMAIL
-#     - PHONE
-#     - NAME
-#     - DATE_OF_BIRTH
-#     - ADDRESS
-#   min_confidence: 0.8
-#   strict_validation: true
+healthcare-en:
+  description: "Healthcare-focused configuration for English (regex-only)"
+  regex_only: true
+  regex_packs:
+    - default
+  mask_types:
+    - SSN
+    - US_SSN
+    - MEDICAL_RECORD_NUMBER
+    - INSURANCE_ID
+    - EMAIL
+    - PHONE
+    - NAME
+    - DATE_OF_BIRTH
+    - ADDRESS
+  min_confidence: 0.8
+  strict_validation: true
 
 high-security:
   description: "Maximum security with all available patterns and models"

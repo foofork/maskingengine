@@ -82,20 +82,49 @@ docker build -t maskingengine:latest .
 
 ## ✅ Quick Start
 
-### CLI
+### 1. First Time? Start Here
 
 ```bash
-echo "Email john@example.com or call 555-123-4567" | maskingengine mask --stdin --regex-only
+# Interactive setup guide
+maskingengine getting-started
+
+# See available profiles
+maskingengine list-profiles
 ```
 
-### Python
+### 2. CLI Usage
+
+```bash
+# Fast regex-only mode (recommended for logs, structured data)
+echo "Email john@example.com or call 555-123-4567" | maskingengine mask --stdin --regex-only
+
+# Use pre-built profiles
+maskingengine mask input.txt --profile healthcare-en -o masked.txt
+
+# Test with sample text
+maskingengine test-sample "Contact john@example.com, SSN: 123-45-6789" --profile minimal
+```
+
+### 3. Python SDK
 
 ```python
 from maskingengine import Sanitizer
 
+# Basic usage
 sanitizer = Sanitizer()
 masked, mask_map = sanitizer.sanitize("Email john@example.com")
 print(masked)  # => Email <<EMAIL_7A9B2C_1>>
+
+# Using profiles
+sanitizer = Sanitizer(profile="healthcare-en")
+result = sanitizer.sanitize("Patient MRN-1234567 contacted at john@hospital.com")
+
+# With rehydration
+from maskingengine import RehydrationPipeline, RehydrationStorage
+pipeline = RehydrationPipeline(Sanitizer(), RehydrationStorage())
+masked, session_id = pipeline.sanitize_with_session("Contact john@example.com", "user_123")
+# ... process with LLM ...
+restored = pipeline.rehydrate_with_session(llm_response, "user_123")
 ```
 
 ---
@@ -149,7 +178,31 @@ Pattern packs are **additive** and can be combined freely.
 
 ## 🔧 Configuration
 
+### Configuration Profiles
+
+MaskingEngine comes with pre-built profiles for common use cases:
+
+| Profile | Description | Speed | Best For |
+|---------|-------------|-------|----------|
+| `minimal` | Regex-only, basic PII types | ~10ms | High-speed processing, structured data |
+| `standard` | Balanced regex + NER detection | ~200ms | General use, balanced speed/accuracy |
+| `healthcare-en` | HIPAA-focused patterns | ~50ms | Medical records, healthcare compliance |
+| `high-security` | Maximum detection with strict validation | ~300ms | Security-critical applications |
+
+```bash
+# Use a profile
+maskingengine mask input.txt --profile healthcare-en -o output.txt
+
+# Or in Python
+from maskingengine import Sanitizer
+sanitizer = Sanitizer(profile="healthcare-en")
+```
+
+### Custom Configuration
+
 ```python
+from maskingengine import Config, Sanitizer
+
 config = Config(
     regex_only=True,
     pattern_packs=["default", "custom"],
@@ -196,15 +249,17 @@ curl -X POST http://localhost:8000/sanitize \
 
 ## ⚙️ Performance Modes
 
-| Mode        | Speed     | When to Use                   |
-| ----------- | --------- | ----------------------------- |
-| Regex-only  | <50ms     | Logs, structured input, speed |
-| Regex + NER | ~200ms    | Unstructured/contextual text  |
-| Streaming   | Efficient | Large files, memory-sensitive |
+| Profile | Mode | Speed | Memory | When to Use |
+|---------|------|-------|---------|-------------|
+| `minimal` | Regex-only | ~10ms | Low | High-speed processing, structured data, logs |
+| `healthcare-en` | Regex-only | ~50ms | Low | Medical records, HIPAA compliance |
+| `standard` | Regex + NER | ~200ms | Medium | General use, balanced speed/accuracy |
+| `high-security` | Regex + NER | ~300ms | Medium | Security-critical, maximum detection |
+| Streaming | Any | Efficient | Low | Large files, memory-sensitive processing |
 
 ✅ Custom pattern packs supported in all modes.
 
-MaskingEngine is stateless and fast, designed to scale horizontally in microservices or distributed queues.
+**Scaling**: MaskingEngine is stateless and fast, designed to scale horizontally in microservices or distributed queues. All processing happens locally with no external dependencies.
 
 ---
 
@@ -245,12 +300,69 @@ df["message"] = df["message"].apply(lambda x: sanitizer.sanitize(str(x))[0])
 
 ## 📦 CLI Commands
 
+### Getting Started
 ```bash
-maskingengine mask input.txt --regex-only -o output.txt
-maskingengine mask input.txt --profile healthcare-en
-maskingengine getting-started
-maskingengine list-profiles
+maskingengine getting-started          # Interactive guide for new users
+maskingengine list-profiles            # Show available configuration profiles
+maskingengine list-packs              # Show available pattern packs
+maskingengine list-models             # Show available NER models
 ```
+
+### Core Masking
+```bash
+# Basic masking
+maskingengine mask input.txt --regex-only -o output.txt
+
+# Using profiles
+maskingengine mask input.txt --profile healthcare-en -o output.txt
+maskingengine mask input.txt --profile minimal
+
+# From stdin
+echo "Email: john@example.com" | maskingengine mask --stdin --regex-only
+
+# Test with sample text
+maskingengine test-sample "Email: john@example.com" --profile minimal
+```
+
+### Session-Based Rehydration
+```bash
+# Sanitize with session storage
+maskingengine session-sanitize input.txt --session-id user123 -o masked.txt
+
+# Rehydrate using stored session
+maskingengine session-rehydrate response.txt --session-id user123 -o final.txt
+
+# Manage sessions
+maskingengine sessions                 # List active sessions
+maskingengine cleanup-sessions         # Clean up old sessions
+```
+
+### Configuration & Testing
+```bash
+maskingengine validate-config config.json    # Validate configuration
+maskingengine test                           # Run comprehensive tests
+```
+
+---
+
+## 🆕 What's New in v1.01.00
+
+### Configuration System
+- **Pre-built Profiles**: Ready-to-use configurations for healthcare, minimal processing, and high-security scenarios
+- **JSON Schema Validation**: Full validation of configuration objects with detailed error reporting
+- **Profile Resolution**: Layered config merging (defaults < profile < file < direct overrides)
+- **Environment Integration**: Support for environment-based configuration
+
+### Enhanced Pattern System
+- **Pattern Pack v2.0**: Improved default patterns with better accuracy
+- **Modular Pattern Loading**: Mix and match pattern packs for custom detection rules
+- **Healthcare Patterns**: HIPAA-focused patterns for medical record processing
+
+### Developer Experience
+- **Interactive CLI**: `getting-started` command guides new users through setup
+- **Better Error Messages**: Clear validation errors and configuration feedback
+- **Session Management**: Built-in session cleanup and management commands
+- **Comprehensive Testing**: `test` command validates your installation and configuration
 
 ---
 
@@ -265,11 +377,36 @@ maskingengine list-profiles
 
 ## 🤝 Contributing
 
-1. Fork + clone
-2. Add tests
-3. Submit a PR
+We welcome privacy-conscious developers and AI builders!
 
-We welcome privacy-conscious developers and AI builders.
+### Development Setup
+```bash
+git clone https://github.com/foofork/maskingengine.git
+cd maskingengine
+pip install -e .[dev]
+
+# Run tests
+pytest
+
+# Code quality checks  
+black .
+flake8 .
+mypy maskingengine/
+```
+
+### Contribution Guidelines
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
+
+### What We're Looking For
+- New pattern packs for different industries/regions
+- Performance optimizations
+- Additional NER model integrations
+- Documentation improvements
+- Security enhancements
 
 ---
 

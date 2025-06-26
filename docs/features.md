@@ -385,7 +385,6 @@ df["message"] = df["message"].apply(lambda x: sanitizer.sanitize(str(x))[0])
   - `minimal`: Regex-only mode for basic PII types
   - `standard`: Balanced regex + NER detection
   - `healthcare-en`: HIPAA-focused patterns for healthcare
-  - `finance-en`: Financial PII patterns (SSN, credit cards)
   - `high-security`: Maximum detection with strict validation
 - **JSON Schema Validation**: Full validation of configuration objects
 - **Configuration Resolution**: Layered config merging (defaults < profile < file < direct)

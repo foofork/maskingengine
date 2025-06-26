@@ -3,6 +3,7 @@
 
 from maskingengine import Sanitizer, Config, Rehydrator
 
+
 def test_basic_functionality():
     """Test basic sanitization and rehydration."""
     # Test basic sanitization
@@ -33,11 +34,12 @@ def test_basic_functionality():
     print(f"JSON Masked: {masked_json}")
 
     print("\nBasic tests completed!")
-    
+
     # Basic assertions to make it a proper test
     assert masked_text != original_text
     assert restored_text == original_text
     assert len(rehydration_map) > 0
+
 
 if __name__ == "__main__":
     test_basic_functionality()
