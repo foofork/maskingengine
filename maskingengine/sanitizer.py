@@ -1,7 +1,7 @@
 """Simplified sanitizer class for minimal architecture."""
 
 import time
-from typing import Union, Dict, Any, Optional
+from typing import Union, Dict, Any, Optional, Tuple
 from .config import Config
 from .parsers import Parser, JSONParser, HTMLParser
 from .detectors import Detector
@@ -11,14 +11,16 @@ from .masker import Masker
 class Sanitizer:
     """Main sanitizer class with simple synchronous API."""
 
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, config: Optional[Config] = None) -> None:
         """Initialize sanitizer with configuration."""
         self.config = config or Config()
         self.detector = Detector(self.config)
         self.masker = Masker(self.config.TYPE_HASHES, self.config)
-        self.mask_map = {}  # Store original values for rehydration
+        self.mask_map: Dict[str, str] = {}  # Store original values for rehydration
 
-    def sanitize(self, input_data: Union[str, Dict, Any], format: Optional[str] = None) -> tuple:
+    def sanitize(
+        self, input_data: Union[str, Dict, Any], format: Optional[str] = None
+    ) -> Tuple[Any, Dict[str, str]]:
         """
         Sanitize input data by detecting and masking PII.
 
@@ -43,7 +45,7 @@ class Sanitizer:
                 )
 
             # Reset mask map for each sanitization
-            self.mask_map = {}
+            self.mask_map: Dict[str, str] = {}
 
             # Parse input based on format
             if format == "json" or (format is None and isinstance(input_data, dict)):

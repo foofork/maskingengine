@@ -34,7 +34,7 @@ class StreamingResult:
 class StreamingMaskingSession:
     """Manages streaming PII masking with consistent placeholder generation."""
 
-    def __init__(self, config: Optional[Config] = None, session_id: Optional[str] = None):
+    def __init__(self, config: Optional[Config] = None, session_id: Optional[str] = None) -> None:
         """Initialize streaming session.
 
         Args:

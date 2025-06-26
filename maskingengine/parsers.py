@@ -59,7 +59,7 @@ class JSONParser:
         if isinstance(data, str):
             data = json.loads(data)
 
-        chunks = []
+        chunks: List[TextChunk] = []
         JSONParser._extract_values(data, chunks, [])
         return chunks
 
@@ -107,7 +107,7 @@ class HTMLParser:
     @staticmethod
     def parse(html: str) -> List[TextChunk]:
         """Parse HTML and extract text chunks."""
-        chunks = []
+        chunks: List[TextChunk] = []
 
         # Extract text between tags
         for match in HTMLParser.TEXT_PATTERN.finditer(html):

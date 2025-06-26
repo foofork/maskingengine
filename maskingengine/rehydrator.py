@@ -9,7 +9,7 @@ from pathlib import Path
 class Rehydrator:
     """Restores original PII values from masked content using mask maps."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize rehydrator."""
         self.placeholder_pattern = re.compile(r"<<([A-Z0-9_]+)_([A-F0-9]{6})_(\d+)>>")
 
@@ -161,7 +161,7 @@ class Rehydrator:
 class RehydrationStorage:
     """Handles storage and retrieval of mask maps for later rehydration."""
 
-    def __init__(self, storage_dir: str = "rehydration_storage"):
+    def __init__(self, storage_dir: str = "rehydration_storage") -> None:
         """Initialize storage system."""
         self.storage_dir = Path(storage_dir)
         try:
@@ -239,7 +239,7 @@ class RehydrationStorage:
         """List all stored session IDs."""
         return [f.stem for f in self.storage_dir.glob("*.json")]
 
-    def cleanup_old_sessions(self, max_age_hours: int = 24):
+    def cleanup_old_sessions(self, max_age_hours: int = 24) -> int:
         """
         Clean up old session files.
 
@@ -258,7 +258,7 @@ class RehydrationStorage:
 class RehydrationPipeline:
     """High-level pipeline for sanitization with rehydration support."""
 
-    def __init__(self, sanitizer, storage: Optional[RehydrationStorage] = None):
+    def __init__(self, sanitizer, storage: Optional[RehydrationStorage] = None) -> None:
         """
         Initialize pipeline with sanitizer and optional storage.
 

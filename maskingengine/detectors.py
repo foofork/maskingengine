@@ -1,14 +1,14 @@
 """Simplified detectors module with regex and NER detection."""
 
 import re
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict, Any, Pattern
 from .config import Config
 
 
 class Detection:
     """Simple detection result tuple."""
 
-    def __init__(self, type_: str, text: str, start: int, end: int):
+    def __init__(self, type_: str, text: str, start: int, end: int) -> None:
         self.type = type_
         self.text = text
         self.start = start
@@ -22,12 +22,12 @@ class Detection:
 class RegexDetector:
     """Fast regex-based PII detection with pattern pack support."""
 
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, config: Optional[Config] = None) -> None:
         self.config = config or Config()
         self.patterns = self.config.PATTERNS
         self.compiled_patterns = self._compile_patterns()
 
-    def _compile_patterns(self):
+    def _compile_patterns(self) -> Dict[str, List[Pattern[str]]]:
         """Pre-compile all regex patterns with error handling."""
         compiled = {}
         for name, patterns in self.patterns.items():
@@ -112,7 +112,7 @@ class NERDetector:
         model_path: Optional[str] = None,
         min_confidence: Optional[float] = None,
         config: Optional[Config] = None,
-    ):
+    ) -> None:
         self.model_path = model_path or Config.NER_MODEL_PATH
         self.min_confidence = min_confidence or Config.NER_MIN_CONFIDENCE
         self.config = config or Config()
@@ -121,7 +121,7 @@ class NERDetector:
         self._model_loading = False
 
     @property
-    def model(self):
+    def model(self) -> Any:
         """Lazy load NER model and tokenizer."""
         if self._model is None and not self._model_loading:
             self._model_loading = True
@@ -139,7 +139,7 @@ class NERDetector:
         return self._model
 
     @property
-    def tokenizer(self):
+    def tokenizer(self) -> Any:
         """Get tokenizer (ensures model is loaded first)."""
         _ = self.model  # Trigger model loading
         return self._tokenizer
@@ -221,7 +221,7 @@ class NERDetector:
 class Detector:
     """Main detector that combines regex and NER."""
 
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, config: Optional[Config] = None) -> None:
         self.config = config or Config()
         self.regex_detector = RegexDetector(self.config)
         self.ner_detector = (

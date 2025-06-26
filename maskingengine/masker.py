@@ -11,7 +11,7 @@ class Masker:
         self, type_hashes: Optional[Dict[str, str]] = None, config: Optional[Config] = None
     ) -> None:
         self.type_hashes = type_hashes or Config.TYPE_HASHES
-        self.type_counters = {}
+        self.type_counters: Dict[str, int] = {}
         self.config = config or Config()
 
     def mask(

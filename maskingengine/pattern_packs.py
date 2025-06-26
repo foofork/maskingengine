@@ -40,14 +40,14 @@ class PatternPack:
     version: str
     patterns: List[PatternRule]
 
-    def get_patterns_by_language(self, language: str = None) -> List[PatternRule]:
+    def get_patterns_by_language(self, language: Optional[str] = None) -> List[PatternRule]:
         """Get patterns filtered by language."""
         if language is None:
             return self.patterns
 
         return [pattern for pattern in self.patterns if pattern.language in ["universal", language]]
 
-    def get_patterns_by_tier(self, max_tier: int = None) -> List[PatternRule]:
+    def get_patterns_by_tier(self, max_tier: Optional[int] = None) -> List[PatternRule]:
         """Get patterns filtered by tier (1 = highest priority)."""
         if max_tier is None:
             return self.patterns
